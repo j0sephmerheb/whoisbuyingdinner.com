@@ -23,10 +23,10 @@ export const usePlayerActions = (
 
   // Roll dice - now only rolls for the current player
   const rollDice = async () => {
-    if (!currentPlayer || !game || game.game_phase !== 'playing') return;
+    if (!currentPlayer || !game) return;
     
-    // Only change to rolling phase if not already rolling
-    if (game.game_phase !== 'rolling') {
+    // Only change to rolling phase if currently in playing phase
+    if (game.game_phase === 'playing') {
       await gameService.updateGamePhase(game.id, 'rolling');
     }
     
