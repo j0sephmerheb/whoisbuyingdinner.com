@@ -100,7 +100,7 @@ const Game = () => {
   const { 
     loading, 
     error,
-    game, 
+    game,
     players, 
     currentPlayer,
     opponent,
@@ -114,8 +114,17 @@ const Game = () => {
   useEffect(() => {
     if (!gameId || !playerId) {
       navigate('/');
+      return;
     }
-  }, [gameId, playerId, navigate]);
+    
+    if (game && game.game_phase === 'over') {
+      const redirectTimer = setTimeout(() => {
+        navigate('/');
+      }, 10000);
+      
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [gameId, playerId, navigate, game]);
   
   if (loading) {
     return (

@@ -7,6 +7,7 @@ export const useGameCountdown = (game: GameData | null) => {
   const [countdownValue, setCountdownValue] = useState(5);
   const [isCountingDown, setIsCountingDown] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownStartedRef = useRef<boolean>(false);
 
   // Clear interval on unmount
   useEffect(() => {
@@ -15,12 +16,13 @@ export const useGameCountdown = (game: GameData | null) => {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      countdownStartedRef.current = false;
     };
   }, []);
 
   // Start countdown
   const startCountdown = async () => {
-    if (!game) return false;
+    if (!game || countdownStartedRef.current) return false;
     
     // First check if all players have selected avatars
     const allSelected = await gameService.checkAvatarSelection(game.id);
@@ -28,12 +30,19 @@ export const useGameCountdown = (game: GameData | null) => {
       return false;
     }
     
+    // Set flag to prevent multiple countdowns
+    countdownStartedRef.current = true;
+    
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
     
-    // Start local countdown
+    // Tell server to start the game (server will broadcast to other clients)
+    await gameService.startGame(game.id);
+    
+    // Start local countdown immediately instead of waiting for server response
+    console.log("Starting local countdown");
     setIsCountingDown(true);
     let count = 5;
     setCountdownValue(count);
@@ -48,9 +57,7 @@ export const useGameCountdown = (game: GameData | null) => {
           intervalRef.current = null;
         }
         setIsCountingDown(false);
-        
-        // Actually start the game by updating the game phase to 'playing'
-        gameService.startGame(game.id);
+        countdownStartedRef.current = false;
       }
     }, 1000);
     

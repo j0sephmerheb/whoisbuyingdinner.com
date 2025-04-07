@@ -270,14 +270,7 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
     return false;
   }
   
-  // After the game is over and results are shown, delete the game and players (after a timeout)
-  setTimeout(async () => {
-    // Delete players first (due to foreign key constraints)
-    await supabase.from('players').delete().eq('game_id', gameId);
-    // Then delete the game
-    await supabase.from('games').delete().eq('id', gameId);
-  }, 60000); // Delete after 1 minute to allow users to see results
-  
+  // We no longer delete games - they just remain in the 'over' state
   return true;
 };
 

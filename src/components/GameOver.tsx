@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { CharacterType } from '@/services/gameService';
@@ -16,6 +16,15 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
   
   const userWon = winner === userTeam;
   const isTie = !winner;
+  
+  // Auto-redirect after 10 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/');
+    }, 10000);
+    
+    return () => clearTimeout(timer);
+  }, [navigate]);
   
   const emojiMap: Record<CharacterType, string> = {
     cowboy: '🤠',
@@ -39,6 +48,8 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
           <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
           <p>{loserName} is buying dinner tonight!</p>
         </div>
+        
+        <p className="text-gray-500 mb-4">Redirecting to home in a few seconds...</p>
         
         <Button 
           onClick={() => navigate('/')} 

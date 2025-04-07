@@ -18,6 +18,7 @@ export const useGameSubscriptions = (
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownStartedRef = useRef<boolean>(false);
   const gamePhaseRef = useRef<string | null>(null);
+  const gameIdRef = useRef<string | null>(null);
 
   // Clean up any existing interval when component unmounts
   useEffect(() => {
@@ -34,48 +35,58 @@ export const useGameSubscriptions = (
   useEffect(() => {
     if (!gameId) return;
     
+    // Store the current gameId in ref to detect changes
+    gameIdRef.current = gameId;
+    
     console.log("Setting up game subscriptions for game:", gameId);
     
     // Set up real-time listeners
     const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
       console.log("Game update received:", payload);
       if (payload.new) {
-        setGame(payload.new);
-        
-        // Store the current game phase to compare later
-        const oldPhase = gamePhaseRef.current;
-        const newPhase = payload.new.game_phase;
-        gamePhaseRef.current = newPhase;
-        
-        // Handle game phase changes - Only trigger countdown if phase just changed to 'playing'
-        // and we haven't already started a countdown
-        if (newPhase === 'playing' && 
-            (oldPhase === 'waiting' || oldPhase === 'selection') && 
-            !countdownStartedRef.current) {
-          // Only start countdown if we haven't already started one
-          countdownStartedRef.current = true;
+        // Only update if still the same game
+        if (gameIdRef.current === gameId) {
+          setGame(payload.new);
           
-          // Clear any existing interval first
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-          }
+          // Store the current game phase to compare later
+          const oldPhase = gamePhaseRef.current;
+          const newPhase = payload.new.game_phase;
+          gamePhaseRef.current = newPhase;
           
-          let count = 5;
-          setCountdownValue(count);
-          setIsCountingDown(true);
-          
-          intervalRef.current = setInterval(() => {
-            count--;
-            setCountdownValue(count);
+          // Handle game phase changes - Only trigger countdown if phase just changed to 'playing'
+          // and we haven't already started a countdown
+          if (newPhase === 'playing' && 
+              (oldPhase === 'waiting' || oldPhase === 'selection') && 
+              !countdownStartedRef.current) {
             
-            if (count <= 0) {
-              if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-              }
-              setIsCountingDown(false);
+            // Set the flag to prevent multiple countdowns
+            countdownStartedRef.current = true;
+            console.log("Starting countdown via subscription");
+            
+            // Clear any existing interval first
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
             }
-          }, 1000);
+            
+            let count = 5;
+            setCountdownValue(count);
+            setIsCountingDown(true);
+            
+            intervalRef.current = setInterval(() => {
+              count--;
+              setCountdownValue(count);
+              
+              if (count <= 0) {
+                if (intervalRef.current) {
+                  clearInterval(intervalRef.current);
+                  intervalRef.current = null;
+                }
+                setIsCountingDown(false);
+                countdownStartedRef.current = false;
+              }
+            }, 1000);
+          }
         }
       }
     });

@@ -1,13 +1,16 @@
 
+import { useState } from 'react';
 import { toast } from 'sonner';
 import * as gameService from '@/services/gameService';
-import { GameData, PlayerData, CharacterType } from '@/services/gameService';
+import { GameData, PlayerData, CharacterType, GamePhase } from '@/services/gameService';
 
 export const usePlayerActions = (
   game: GameData | null,
   currentPlayer: PlayerData | null,
   opponent: PlayerData | null
 ) => {
+  const [isRolling, setIsRolling] = useState(false);
+  
   // Select avatar
   const selectAvatar = async (avatarType: CharacterType) => {
     if (!currentPlayer) return false;
@@ -25,13 +28,25 @@ export const usePlayerActions = (
   const rollDice = async () => {
     if (!currentPlayer || !game) return;
     
-    // Only change to rolling phase if currently in playing phase
-    if (game.game_phase === 'playing') {
-      await gameService.updateGamePhase(game.id, 'rolling');
+    // Check if the game is in the correct phase
+    if (game.game_phase !== 'playing' && game.game_phase !== 'rolling') {
+      return;
     }
     
-    // Roll dice for the current player only
-    if (currentPlayer.dice_value === null) {
+    // Check if this player has already rolled
+    if (currentPlayer.dice_value !== null) {
+      return;
+    }
+    
+    setIsRolling(true);
+    
+    try {
+      // Only change to rolling phase if currently in playing phase
+      if (game.game_phase === 'playing') {
+        await gameService.updateGamePhase(game.id, 'rolling');
+      }
+      
+      // Roll dice for the current player only
       const value = await gameService.rollDice(currentPlayer.id);
       console.log(`Player ${currentPlayer.name} rolled: ${value}`);
       
@@ -47,6 +62,11 @@ export const usePlayerActions = (
           }, 2000);
         }, 500);
       }
+    } catch (error) {
+      console.error('Error rolling dice:', error);
+      toast.error('Failed to roll dice. Try again.');
+    } finally {
+      setIsRolling(false);
     }
   };
 
@@ -118,6 +138,7 @@ export const usePlayerActions = (
 
   return {
     selectAvatar,
-    rollDice
+    rollDice,
+    isRolling
   };
 };
