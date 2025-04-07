@@ -107,6 +107,7 @@ export const useGameSubscriptions = (
             setGame(currentGame => {
               if (currentGame && currentGame.game_phase === 'waiting') {
                 console.log("Both players joined via subscription, updating game phase to selection");
+                // Use a Promise chain with proper types
                 supabase
                   .from('games')
                   .update({ game_phase: 'selection' })
@@ -114,7 +115,7 @@ export const useGameSubscriptions = (
                   .then(() => {
                     console.log("Game phase updated to selection");
                   })
-                  .catch(err => {
+                  .catch((err: any) => {
                     console.error("Error updating game phase:", err);
                   });
                   
