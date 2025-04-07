@@ -7,7 +7,7 @@ import { GameData, PlayerData } from '@/services/gameService';
 export const useGameDataLoader = (
   gameId: string | undefined,
   playerId: string | undefined,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setLoading: (loading: boolean) => void,
   setError: React.Dispatch<React.SetStateAction<string | null>>,
   setGame: React.Dispatch<React.SetStateAction<GameData | null>>,
   setPlayers: React.Dispatch<React.SetStateAction<PlayerData[]>>,

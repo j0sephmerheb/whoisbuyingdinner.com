@@ -16,9 +16,11 @@ export const useMultiplayerGame = (
   const [players, setPlayers] = useState<gameService.PlayerData[]>([]);
   const [currentPlayer, setCurrentPlayer] = useState<gameService.PlayerData | null>(null);
   const [opponent, setOpponent] = useState<gameService.PlayerData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Game management (create/join game)
-  const { loading, error, createGame, joinGame, setError } = useGameManagement();
+  const { createGame, joinGame } = useGameManagement();
 
   // Countdown functionality
   const { countdownValue, isCountingDown, setCountdownValue, setIsCountingDown, startCountdown } = useGameCountdown(game);
@@ -30,7 +32,7 @@ export const useMultiplayerGame = (
   useGameDataLoader(
     gameId, 
     playerId,
-    setLoading => loading,
+    setLoading,
     setError, 
     setGame, 
     setPlayers, 
