@@ -6,10 +6,11 @@ import DiceRoller from '@/components/DiceRoller';
 import GameBoard from '@/components/GameBoard';
 import GameOver from '@/components/GameOver';
 import { Button } from '@/components/ui/button';
+import { Shield } from 'lucide-react';
 
 const Game = () => {
-  const { gameState, resetGame } = useGame();
-  const { gamePhase, currentRound, userTeam } = gameState;
+  const { gameState, resetGame, useSpecialPower } = useGame();
+  const { gamePhase, currentRound, userTeam, userScore, systemScore, specialPowerAvailable } = gameState;
   
   return (
     <div className="min-h-screen flex flex-col items-center bg-gameBackground p-4">
@@ -38,7 +39,23 @@ const Game = () => {
                   Your Team: {userTeam === 'chicken' ? '🐔 Chickens' : '🤠 Cowboys'}
                 </span>
               </div>
+              
+              <div className="bg-gameAccent/10 px-4 py-2 rounded-lg">
+                <span className="font-semibold">Score: {userScore} - {systemScore}</span>
+              </div>
             </div>
+            
+            {specialPowerAvailable && (
+              <div className="w-full flex justify-center mb-4">
+                <Button 
+                  onClick={useSpecialPower}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-2"
+                >
+                  <Shield size={16} />
+                  Use Special Power (+2 bonus)
+                </Button>
+              </div>
+            )}
             
             <GameBoard />
             <DiceRoller />

@@ -15,6 +15,10 @@ interface GameState {
   systemDiceValue: number | null;
   gamePhase: GamePhase;
   winner: Team | 'tie' | null;
+  userScore: number;
+  systemScore: number;
+  specialPowerAvailable: boolean;
+  specialPowerUsed: boolean;
 }
 
 interface GameContextType {
@@ -22,6 +26,7 @@ interface GameContextType {
   setUserTeam: (team: Team) => void;
   rollDice: () => void;
   resetGame: () => void;
+  useSpecialPower: () => void;
 }
 
 const defaultGameState: GameState = {
@@ -33,12 +38,28 @@ const defaultGameState: GameState = {
   systemDiceValue: null,
   gamePhase: 'selection',
   winner: null,
+  userScore: 0,
+  systemScore: 0,
+  specialPowerAvailable: false,
+  specialPowerUsed: false,
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [gameState, setGameState] = useState<GameState>({ ...defaultGameState });
+
+  // Track consecutive wins to enable special power
+  useEffect(() => {
+    // Check if user has won 2 consecutive rounds to enable special power
+    if (gameState.userScore >= 2 && !gameState.specialPowerUsed && !gameState.specialPowerAvailable) {
+      setGameState(prev => ({
+        ...prev,
+        specialPowerAvailable: true
+      }));
+      toast("Special power available! Win the next roll with a +2 bonus!");
+    }
+  }, [gameState.userScore]);
 
   const setUserTeam = (team: Team) => {
     setGameState(prev => ({
@@ -47,6 +68,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       gamePhase: 'playing'
     }));
     toast(`You selected Team ${team === 'chicken' ? 'Chicken' : 'Cowboy'}!`);
+  };
+
+  const useSpecialPower = () => {
+    if (!gameState.specialPowerAvailable) return;
+    
+    setGameState(prev => ({
+      ...prev,
+      specialPowerAvailable: false,
+      specialPowerUsed: true
+    }));
+    
+    toast("Special power activated for your next roll!");
   };
 
   const rollDice = () => {
@@ -61,8 +94,19 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Simulate dice rolling animation time
     setTimeout(() => {
-      const userRoll = Math.floor(Math.random() * 6) + 1;
+      let userRoll = Math.floor(Math.random() * 6) + 1;
       const systemRoll = Math.floor(Math.random() * 6) + 1;
+      
+      // Apply special power if available and used
+      if (gameState.specialPowerUsed) {
+        userRoll += 2; // Add +2 bonus
+        toast("Special power gave you +2 to your roll!");
+        
+        setGameState(prev => ({
+          ...prev,
+          specialPowerUsed: false
+        }));
+      }
       
       setGameState(prev => {
         // Calculate new game state
@@ -92,6 +136,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clone the character arrays to avoid direct mutations
       const newUserCharacters = [...prev.userCharacters];
       const newSystemCharacters = [...prev.systemCharacters];
+      let newUserScore = prev.userScore;
+      let newSystemScore = prev.systemScore;
       
       if (!isTie) {
         if (userWinsRoll) {
@@ -99,12 +145,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const firstAliveSystemCharIndex = newSystemCharacters.findIndex(c => c.alive);
           if (firstAliveSystemCharIndex !== -1) {
             newSystemCharacters[firstAliveSystemCharIndex].alive = false;
+            newUserScore += 1;
             
             // Show appropriate toast based on user's team
             if (userTeamIsChicken) {
-              toast("Your chicken launched an egg! A cowboy is down!");
+              toast("Your chicken scored a hit! A cowboy is down!");
             } else {
-              toast("Your cowboy threw a beer bottle! A chicken is down!");
+              toast("Your cowboy scored a hit! A chicken is down!");
             }
           }
         } else {
@@ -112,12 +159,13 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const firstAliveUserCharIndex = newUserCharacters.findIndex(c => c.alive);
           if (firstAliveUserCharIndex !== -1) {
             newUserCharacters[firstAliveUserCharIndex].alive = false;
+            newSystemScore += 1;
             
             // Show appropriate toast based on user's team
             if (userTeamIsChicken) {
-              toast("Enemy cowboy threw a beer bottle! A chicken is down!");
+              toast("Enemy cowboy scored a hit! A chicken is down!");
             } else {
-              toast("Enemy chicken launched an egg! A cowboy is down!");
+              toast("Enemy chicken scored a hit! A cowboy is down!");
             }
           }
         }
@@ -161,6 +209,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentRound: prev.currentRound + 1,
         gamePhase: newGamePhase,
         winner,
+        userScore: newUserScore,
+        systemScore: newSystemScore,
       };
     });
   };
@@ -171,7 +221,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <GameContext.Provider value={{ gameState, setUserTeam, rollDice, resetGame }}>
+    <GameContext.Provider value={{ gameState, setUserTeam, rollDice, resetGame, useSpecialPower }}>
       {children}
     </GameContext.Provider>
   );
