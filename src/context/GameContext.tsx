@@ -19,6 +19,7 @@ interface GameState {
   systemScore: number;
   specialPowerAvailable: boolean;
   specialPowerUsed: boolean;
+  consecutiveWins: number;
 }
 
 interface GameContextType {
@@ -42,6 +43,7 @@ const defaultGameState: GameState = {
   systemScore: 0,
   specialPowerAvailable: false,
   specialPowerUsed: false,
+  consecutiveWins: 0,
 };
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -51,15 +53,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Track consecutive wins to enable special power
   useEffect(() => {
-    // Check if user has won 2 consecutive rounds to enable special power
-    if (gameState.userScore >= 2 && !gameState.specialPowerUsed && !gameState.specialPowerAvailable) {
+    // Only activate special power after 2 consecutive wins and if not already used
+    if (gameState.consecutiveWins >= 2 && !gameState.specialPowerUsed && !gameState.specialPowerAvailable) {
       setGameState(prev => ({
         ...prev,
         specialPowerAvailable: true
       }));
       toast("Special power available! Win the next roll with a +2 bonus!");
     }
-  }, [gameState.userScore]);
+  }, [gameState.consecutiveWins]);
 
   const setUserTeam = (team: Team) => {
     setGameState(prev => ({
@@ -104,7 +106,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setGameState(prev => ({
           ...prev,
-          specialPowerUsed: false
+          specialPowerUsed: false,
+          consecutiveWins: 0 // Reset consecutive wins after using special power
         }));
       }
       
@@ -138,6 +141,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newSystemCharacters = [...prev.systemCharacters];
       let newUserScore = prev.userScore;
       let newSystemScore = prev.systemScore;
+      let newConsecutiveWins = prev.consecutiveWins;
       
       if (!isTie) {
         if (userWinsRoll) {
@@ -146,6 +150,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (firstAliveSystemCharIndex !== -1) {
             newSystemCharacters[firstAliveSystemCharIndex].alive = false;
             newUserScore += 1;
+            newConsecutiveWins += 1; // Increment consecutive wins
             
             // Show appropriate toast based on user's team
             if (userTeamIsChicken) {
@@ -160,6 +165,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (firstAliveUserCharIndex !== -1) {
             newUserCharacters[firstAliveUserCharIndex].alive = false;
             newSystemScore += 1;
+            newConsecutiveWins = 0; // Reset consecutive wins
             
             // Show appropriate toast based on user's team
             if (userTeamIsChicken) {
@@ -171,6 +177,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         toast("It's a tie! No damage dealt.");
+        // Reset consecutive wins on tie
+        newConsecutiveWins = 0;
       }
       
       // Count alive characters
@@ -211,12 +219,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         winner,
         userScore: newUserScore,
         systemScore: newSystemScore,
+        consecutiveWins: newConsecutiveWins,
       };
     });
   };
 
   const resetGame = () => {
-    setGameState({ ...defaultGameState });
+    // Create completely fresh game state
+    setGameState({
+      ...defaultGameState,
+      userTeam: null, // Force team selection again
+      gamePhase: 'selection'
+    });
     toast("New game started!");
   };
 
