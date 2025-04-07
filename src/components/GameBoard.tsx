@@ -9,21 +9,37 @@ interface GameBoardProps {
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
-  const userTeamIsChicken = currentPlayer.character_type === 'chicken';
+  // Get the emoji based on character type
+  const emojiMap: Record<string, string> = {
+    cowboy: '🤠',
+    ninja: '🥷',
+    fireman: '👨‍🚒',
+    santa: '🎅'
+  };
   
-  // Define emoji based on team
-  const userEmoji = userTeamIsChicken ? '🐔' : '🤠';
-  const opponentEmoji = userTeamIsChicken ? '🤠' : '🐔';
+  const userEmoji = emojiMap[currentPlayer.character_type] || '🤠';
+  const opponentEmoji = opponent ? emojiMap[opponent.character_type] || '🤠' : '❓';
   
-  const userTeamColor = userTeamIsChicken ? 'bg-chicken' : 'bg-cowboy';
-  const opponentTeamColor = userTeamIsChicken ? 'bg-cowboy' : 'bg-chicken';
+  // Get team colors based on character type
+  const getTeamColor = (characterType: string): string => {
+    switch(characterType) {
+      case 'cowboy': return 'bg-blue-100';
+      case 'ninja': return 'bg-purple-100';
+      case 'fireman': return 'bg-red-100';
+      case 'santa': return 'bg-green-100';
+      default: return 'bg-gray-100';
+    }
+  };
+  
+  const userTeamColor = getTeamColor(currentPlayer.character_type);
+  const opponentTeamColor = opponent ? getTeamColor(opponent.character_type) : 'bg-gray-100';
 
   return (
     <div className="w-full py-2">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className={`p-4 ${userTeamColor} shadow-lg border-none`}>
           <h3 className="text-xl font-bold mb-3">
-            {currentPlayer.name} ({userTeamIsChicken ? 'Chickens' : 'Cowboys'})
+            {currentPlayer.name} ({currentPlayer.character_type})
           </h3>
           <div className="flex justify-center gap-2">
             {currentPlayer.character_data.map((character, index) => (
@@ -47,7 +63,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
         
         <Card className={`p-4 ${opponentTeamColor} shadow-lg border-none`}>
           <h3 className="text-xl font-bold mb-3">
-            {opponent?.name || 'Opponent'} ({userTeamIsChicken ? 'Cowboys' : 'Chickens'})
+            {opponent?.name || 'Opponent'} ({opponent?.character_type || '???'})
           </h3>
           <div className="flex justify-center gap-2">
             {opponent?.character_data.map((character, index) => (

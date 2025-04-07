@@ -45,6 +45,8 @@ export const createGame = async (playerName: string): Promise<{ gameId: string, 
   }
 
   // Then create the host player
+  const initialCharacterData = Array(5).fill(null).map((_, id) => ({ alive: true, id }));
+  
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
@@ -52,7 +54,7 @@ export const createGame = async (playerName: string): Promise<{ gameId: string, 
       game_id: gameData.id,
       character_type: 'cowboy', // Default, will be changed during selection
       is_host: true,
-      character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
+      character_data: initialCharacterData
     }])
     .select()
     .single();
@@ -102,6 +104,8 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
   }
 
   // Create the player
+  const initialCharacterData = Array(5).fill(null).map((_, id) => ({ alive: true, id }));
+  
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
@@ -109,7 +113,7 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
       game_id: gameId,
       character_type: 'cowboy', // Default, will be changed during selection
       is_host: false,
-      character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
+      character_data: initialCharacterData
     }])
     .select()
     .single();
@@ -163,7 +167,7 @@ export const checkAvatarSelection = async (gameId: string): Promise<boolean> => 
 export const startCountdown = async (gameId: string): Promise<boolean> => {
   const { error } = await supabase
     .from('games')
-    .update({ game_phase: 'countdown' })
+    .update({ game_phase: 'countdown' as GamePhase })
     .eq('id', gameId);
 
   if (error) {

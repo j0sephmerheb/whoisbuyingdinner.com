@@ -3,10 +3,11 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createDefaultGameState, resolveRoundOutcome } from '@/utils/gameUtils';
 import { Character, GameState, Team, GamePhase } from '@/types/gameTypes';
 import { toast } from 'sonner';
+import { CharacterType } from '@/services/gameService';
 
 interface GameContextType {
   gameState: GameState;
-  setUserTeam: (team: Team) => void;
+  setUserTeam: (team: CharacterType) => void;
   rollDice: () => void;
   useSpecialPower: () => void;
   resetGame: () => void;
@@ -19,14 +20,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [gameState, setGameState] = useState<GameState>(createDefaultGameState());
 
   // Set user's team
-  const setUserTeam = (team: Team) => {
+  const setUserTeam = (team: CharacterType) => {
     setGameState(prev => ({
       ...prev,
       userTeam: team,
       gamePhase: 'playing',
     }));
     
-    toast.success(`You selected Team ${team === 'chicken' ? 'Chicken! 🐔' : 'Cowboy! 🤠'}`);
+    toast.success(`You selected ${team}!`);
   };
 
   // Roll the dice

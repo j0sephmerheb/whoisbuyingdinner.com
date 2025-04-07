@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/gameService';
 import { useNavigate } from 'react-router-dom';
+import { Json } from '@/integrations/supabase/types';
 
 export const useMultiplayerGame = (
   gameId?: string,
@@ -195,13 +196,22 @@ export const useMultiplayerGame = (
           .eq('game_id', gameId);
         
         if (playersError) throw new Error(playersError.message);
-        setPlayers(playersData);
+        
+        // Convert the Json character_data to the correct type
+        const typedPlayersData = playersData.map(player => ({
+          ...player,
+          character_data: Array.isArray(player.character_data) 
+            ? player.character_data 
+            : Array(5).fill(null).map((_, id) => ({ alive: true, id }))
+        })) as gameService.PlayerData[];
+        
+        setPlayers(typedPlayersData);
         
         // Set current player and opponent
-        const current = playersData.find(p => p.id === playerId);
+        const current = typedPlayersData.find(p => p.id === playerId);
         if (current) setCurrentPlayer(current);
         
-        const other = playersData.find(p => p.id !== playerId);
+        const other = typedPlayersData.find(p => p.id !== playerId);
         if (other) setOpponent(other);
         
       } catch (err: any) {
@@ -244,17 +254,25 @@ export const useMultiplayerGame = (
           const newPlayers = [...prev];
           const index = newPlayers.findIndex(p => p.id === payload.new.id);
           
+          // Convert character_data from Json to typed array if needed
+          const newPlayerData = {
+            ...payload.new,
+            character_data: Array.isArray(payload.new.character_data) 
+              ? payload.new.character_data 
+              : Array(5).fill(null).map((_, id) => ({ alive: true, id }))
+          } as gameService.PlayerData;
+          
           if (index !== -1) {
-            newPlayers[index] = payload.new;
+            newPlayers[index] = newPlayerData;
           } else {
-            newPlayers.push(payload.new);
+            newPlayers.push(newPlayerData);
           }
           
           // Update current player and opponent references
           if (payload.new.id === playerId) {
-            setCurrentPlayer(payload.new);
+            setCurrentPlayer(newPlayerData);
           } else {
-            setOpponent(payload.new);
+            setOpponent(newPlayerData);
           }
           
           return newPlayers;

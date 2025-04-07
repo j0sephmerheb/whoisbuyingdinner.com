@@ -25,7 +25,6 @@ export const resolveRoundOutcome = (
   systemRoll: number,
   gameState: GameState
 ): Partial<GameState> => {
-  const userTeamIsChicken = gameState.userTeam === 'chicken';
   const userWinsRoll = userRoll > systemRoll;
   const isTie = userRoll === systemRoll;
   
@@ -46,11 +45,7 @@ export const resolveRoundOutcome = (
         newConsecutiveWins += 1; // Increment consecutive wins
         
         // Show appropriate toast based on user's team
-        if (userTeamIsChicken) {
-          toast("Your chicken scored a hit! A cowboy is down!");
-        } else {
-          toast("Your cowboy scored a hit! A chicken is down!");
-        }
+        toast("Your character scored a hit! An opponent is down!");
       }
     } else {
       // System wins the roll - damage user character
@@ -61,11 +56,7 @@ export const resolveRoundOutcome = (
         newConsecutiveWins = 0; // Reset consecutive wins
         
         // Show appropriate toast based on user's team
-        if (userTeamIsChicken) {
-          toast("Enemy cowboy scored a hit! A chicken is down!");
-        } else {
-          toast("Enemy chicken scored a hit! A cowboy is down!");
-        }
+        toast("Enemy scored a hit! Your character is down!");
       }
     }
   } else {
@@ -87,12 +78,12 @@ export const resolveRoundOutcome = (
     
     if (userAliveCount > systemAliveCount) {
       winner = gameState.userTeam!;
-      toast(`${gameState.userTeam === 'chicken' ? 'Chickens' : 'Cowboys'} win! You are victorious!`, {
+      toast(`${gameState.userTeam} wins! You are victorious!`, {
         duration: 5000,
       });
     } else if (systemAliveCount > userAliveCount) {
-      winner = gameState.userTeam === 'chicken' ? 'cowboy' : 'chicken';
-      toast(`${gameState.userTeam === 'chicken' ? 'Cowboys' : 'Chickens'} win! Better luck next time!`, {
+      winner = null; // We don't know the opponent's team here, so just set null
+      toast(`You lost! Better luck next time!`, {
         duration: 5000,
       });
     } else {

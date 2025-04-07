@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { GameState, Team } from '@/types/gameTypes';
 import { createDefaultGameState, resolveRoundOutcome } from '@/utils/gameUtils';
 import { toast } from 'sonner';
+import { CharacterType } from '@/services/gameService';
 
 export const useGameActions = () => {
   const [gameState, setGameState] = useState<GameState>(createDefaultGameState());
@@ -19,13 +20,13 @@ export const useGameActions = () => {
     }
   }, [gameState.consecutiveWins]);
 
-  const setUserTeam = (team: Team) => {
+  const setUserTeam = (team: CharacterType) => {
     setGameState(prev => ({
       ...prev,
       userTeam: team,
       gamePhase: 'playing'
     }));
-    toast(`You selected Team ${team === 'chicken' ? 'Chicken' : 'Cowboy'}!`);
+    toast(`You selected avatar: ${team}!`);
   };
 
   const useSpecialPower = () => {
