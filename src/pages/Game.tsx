@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
@@ -11,7 +10,6 @@ import GameOver from '@/components/GameOver';
 import { Loader2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Create a waiting lobby component
 const WaitingLobby = ({ 
   gameId, 
   players, 
@@ -82,7 +80,6 @@ const WaitingLobby = ({
   );
 };
 
-// Countdown component
 const Countdown = ({ value }: { value: number }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
@@ -115,7 +112,6 @@ const Game = () => {
   } = useMultiplayerGame(gameId, playerId);
   
   useEffect(() => {
-    // If no gameId or playerId, redirect to home
     if (!gameId || !playerId) {
       navigate('/');
     }
@@ -204,9 +200,10 @@ const Game = () => {
             <GameBoard currentPlayer={currentPlayer} opponent={opponent} />
             <DiceRoller 
               gamePhase={game_phase} 
-              userDiceValue={currentPlayer.dice_value} 
-              systemDiceValue={opponent?.dice_value}
+              currentPlayer={currentPlayer}
+              opponent={opponent}
               onRoll={rollDice}
+              isCurrentPlayer={true}
             />
           </div>
         )}

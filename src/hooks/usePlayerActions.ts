@@ -21,29 +21,33 @@ export const usePlayerActions = (
     return result;
   };
 
-  // Roll dice
+  // Roll dice - now only rolls for the current player
   const rollDice = async () => {
     if (!currentPlayer || !game || game.game_phase !== 'playing') return;
     
-    // Update game phase to rolling
-    await gameService.updateGamePhase(game.id, 'rolling');
+    // Only change to rolling phase if not already rolling
+    if (game.game_phase !== 'rolling') {
+      await gameService.updateGamePhase(game.id, 'rolling');
+    }
     
-    // Simulate dice roll with delay
-    setTimeout(async () => {
+    // Roll dice for the current player only
+    if (currentPlayer.dice_value === null) {
       const value = await gameService.rollDice(currentPlayer.id);
+      console.log(`Player ${currentPlayer.name} rolled: ${value}`);
       
-      // After both players have rolled, determine the winner
-      setTimeout(() => {
-        if (game.players?.every(p => p.dice_value !== null)) {
-          gameService.updateGamePhase(game.id, 'result');
+      // Check if both players have rolled dice
+      if (opponent && opponent.dice_value !== null) {
+        // Move to result phase after a short delay
+        setTimeout(async () => {
+          await gameService.updateGamePhase(game.id, 'result');
           
           // After showing result, process the round outcome
           setTimeout(() => {
             processRoundOutcome();
           }, 2000);
-        }
-      }, 500);
-    }, 1500);
+        }, 500);
+      }
+    }
   };
 
   // Process the outcome of a round
@@ -55,7 +59,7 @@ export const usePlayerActions = (
     
     // Determine who won the round
     if (userRoll > opponentRoll) {
-      // Player wins
+      // Current player wins
       const updatedCharacters = [...opponent.character_data];
       // Find first alive character and eliminate it
       const aliveIndex = updatedCharacters.findIndex(c => c.alive);
