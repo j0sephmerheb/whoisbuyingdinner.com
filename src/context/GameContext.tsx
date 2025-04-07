@@ -225,12 +225,18 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetGame = () => {
-    // Create completely fresh game state
+    // Create a new set of characters with all alive
+    const freshUserCharacters = Array(5).fill(null).map((_, id) => ({ alive: true, id }));
+    const freshSystemCharacters = Array(5).fill(null).map((_, id) => ({ alive: true, id }));
+    
+    // Create completely fresh game state with new character arrays
     setGameState({
       ...defaultGameState,
-      userTeam: null, // Force team selection again
+      userCharacters: freshUserCharacters,
+      systemCharacters: freshSystemCharacters,
       gamePhase: 'selection'
     });
+    
     toast("New game started!");
   };
 
