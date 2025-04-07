@@ -1,9 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Json } from '@/integrations/supabase/types';
 
 // Types for our database schema
-export type GamePhase = 'waiting' | 'selection' | 'countdown' | 'playing' | 'rolling' | 'result' | 'over';
+export type GamePhase = 'waiting' | 'selection' | 'playing' | 'rolling' | 'result' | 'over';
 // Match to Supabase database enum type
 export type DBCharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa';
 export type CharacterType = DBCharacterType;
@@ -167,7 +166,7 @@ export const checkAvatarSelection = async (gameId: string): Promise<boolean> => 
 export const startCountdown = async (gameId: string): Promise<boolean> => {
   const { error } = await supabase
     .from('games')
-    .update({ game_phase: 'countdown' as GamePhase })
+    .update({ game_phase: 'playing' })
     .eq('id', gameId);
 
   if (error) {

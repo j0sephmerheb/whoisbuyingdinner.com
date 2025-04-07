@@ -18,6 +18,7 @@ export const useMultiplayerGame = (
   const [currentPlayer, setCurrentPlayer] = useState<gameService.PlayerData | null>(null);
   const [opponent, setOpponent] = useState<gameService.PlayerData | null>(null);
   const [countdownValue, setCountdownValue] = useState(5);
+  const [isCountingDown, setIsCountingDown] = useState(false);
 
   // Create a new game
   const createGame = async (playerName: string) => {
@@ -73,11 +74,25 @@ export const useMultiplayerGame = (
       return false;
     }
     
-    const result = await gameService.startCountdown(game.id);
-    if (!result) {
-      toast.error('Failed to start countdown');
-    }
-    return result;
+    // Start local countdown
+    setIsCountingDown(true);
+    let count = 5;
+    setCountdownValue(count);
+    
+    const interval = setInterval(() => {
+      count--;
+      setCountdownValue(count);
+      
+      if (count <= 0) {
+        clearInterval(interval);
+        setIsCountingDown(false);
+        
+        // Actually start the game
+        gameService.startGame(game.id);
+      }
+    }, 1000);
+    
+    return true;
   };
 
   // Roll dice
@@ -229,10 +244,15 @@ export const useMultiplayerGame = (
       if (payload.new) {
         setGame(payload.new);
         
-        // Start countdown timer if game phase is countdown
-        if (payload.new.game_phase === 'countdown' && payload.old.game_phase !== 'countdown') {
+        // Handle game phase changes
+        if (payload.new.game_phase === 'playing' && 
+            payload.old?.game_phase === 'waiting' ||
+            payload.old?.game_phase === 'selection') {
+          // This would be when we just transitioned from waiting to playing
+          // We'll start countdown here
           let count = 5;
           setCountdownValue(count);
+          setIsCountingDown(true);
           
           const interval = setInterval(() => {
             count--;
@@ -240,8 +260,7 @@ export const useMultiplayerGame = (
             
             if (count <= 0) {
               clearInterval(interval);
-              // Start the game after countdown
-              gameService.startGame(gameId);
+              setIsCountingDown(false);
             }
           }, 1000);
         }
@@ -294,6 +313,7 @@ export const useMultiplayerGame = (
     currentPlayer,
     opponent,
     countdownValue,
+    isCountingDown,
     createGame,
     joinGame,
     selectAvatar,
