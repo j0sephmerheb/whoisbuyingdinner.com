@@ -87,7 +87,7 @@ export const useMultiplayerGame = (
         clearInterval(interval);
         setIsCountingDown(false);
         
-        // Actually start the game
+        // Actually start the game by updating the game phase to 'playing'
         gameService.startGame(game.id);
       }
     }, 1000);
@@ -246,10 +246,10 @@ export const useMultiplayerGame = (
         
         // Handle game phase changes
         if (payload.new.game_phase === 'playing' && 
-            payload.old?.game_phase === 'waiting' ||
-            payload.old?.game_phase === 'selection') {
-          // This would be when we just transitioned from waiting to playing
-          // We'll start countdown here
+            (payload.old?.game_phase === 'waiting' ||
+             payload.old?.game_phase === 'selection')) {
+          // This would be when we just transitioned from waiting/selection to playing
+          // We'll start countdown here for non-host players
           let count = 5;
           setCountdownValue(count);
           setIsCountingDown(true);

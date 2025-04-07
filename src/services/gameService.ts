@@ -178,6 +178,7 @@ export const startCountdown = async (gameId: string): Promise<boolean> => {
 
 // Start the game
 export const startGame = async (gameId: string): Promise<boolean> => {
+  // Update game phase to playing directly
   const { error } = await supabase
     .from('games')
     .update({ game_phase: 'playing' })
@@ -187,6 +188,13 @@ export const startGame = async (gameId: string): Promise<boolean> => {
     console.error("Error starting game:", error);
     return false;
   }
+  
+  // Also update current round to 1 to ensure we start from the beginning
+  await supabase
+    .from('games')
+    .update({ current_round: 1 })
+    .eq('id', gameId);
+    
   return true;
 };
 
