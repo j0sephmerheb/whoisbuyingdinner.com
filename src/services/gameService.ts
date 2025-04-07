@@ -1,10 +1,26 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Team } from '@/types/gameTypes';
+import { Json } from '@/integrations/supabase/types';
 
 // Types for our database schema
 export type GamePhase = 'waiting' | 'selection' | 'playing' | 'rolling' | 'result' | 'over';
+// Match to Supabase database enum type
+export type DBCharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa';
+// Our game only uses cowboy and chicken (ninja repurposed as chicken)
 export type CharacterType = 'chicken' | 'cowboy';
+
+// Helper function to map between our game types and database types
+export const mapToDBCharacterType = (gameType: CharacterType): DBCharacterType => {
+  if (gameType === 'chicken') return 'ninja';
+  return gameType;
+};
+
+export const mapFromDBCharacterType = (dbType: DBCharacterType): CharacterType => {
+  if (dbType === 'ninja') return 'chicken';
+  if (dbType === 'fireman' || dbType === 'santa') return 'cowboy';
+  return dbType;
+};
 
 export interface GameData {
   id: string;
@@ -42,13 +58,13 @@ export const createGame = async (playerName: string): Promise<{ gameId: string, 
     return null;
   }
 
-  // Then create the host player
+  // Then create the host player - using ninja as our database representation for chicken
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
       name: playerName,
       game_id: gameData.id,
-      character_type: 'chicken', // Default, will be changed during selection
+      character_type: 'ninja', // Default, will be changed during selection
       is_host: true,
       character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
     }])
@@ -83,13 +99,13 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
     return null;
   }
 
-  // Create the player
+  // Create the player - using ninja as our database representation for chicken
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
       name: playerName,
       game_id: gameId,
-      character_type: 'chicken', // Default, will be changed during selection
+      character_type: 'ninja', // Default, will be changed during selection
       is_host: false,
       character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
     }])
@@ -106,9 +122,12 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
 
 // Select team
 export const selectTeam = async (playerId: string, team: Team): Promise<boolean> => {
+  // Map our game type to database type
+  const dbCharacterType = mapToDBCharacterType(team as CharacterType);
+
   const { error } = await supabase
     .from('players')
-    .update({ character_type: team })
+    .update({ character_type: dbCharacterType })
     .eq('id', playerId);
 
   if (error) {

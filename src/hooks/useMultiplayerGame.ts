@@ -188,13 +188,20 @@ export const useMultiplayerGame = (
           .eq('game_id', gameId);
         
         if (playersError) throw new Error(playersError.message);
-        setPlayers(playersData);
+        
+        // Transform the character_type from database enum to our game types
+        const transformedPlayers = playersData.map(player => ({
+          ...player,
+          character_type: gameService.mapFromDBCharacterType(player.character_type)
+        })) as gameService.PlayerData[];
+        
+        setPlayers(transformedPlayers);
         
         // Set current player and opponent
-        const current = playersData.find(p => p.id === playerId);
+        const current = transformedPlayers.find(p => p.id === playerId);
         if (current) setCurrentPlayer(current);
         
-        const other = playersData.find(p => p.id !== playerId);
+        const other = transformedPlayers.find(p => p.id !== playerId);
         if (other) setOpponent(other);
         
       } catch (err: any) {
@@ -220,17 +227,23 @@ export const useMultiplayerGame = (
           const newPlayers = [...prev];
           const index = newPlayers.findIndex(p => p.id === payload.new.id);
           
+          // Transform the character_type from database enum to our game types
+          const transformedPlayer = {
+            ...payload.new,
+            character_type: gameService.mapFromDBCharacterType(payload.new.character_type)
+          } as gameService.PlayerData;
+          
           if (index !== -1) {
-            newPlayers[index] = payload.new;
+            newPlayers[index] = transformedPlayer;
           } else {
-            newPlayers.push(payload.new);
+            newPlayers.push(transformedPlayer);
           }
           
           // Update current player and opponent references
-          if (payload.new.id === playerId) {
-            setCurrentPlayer(payload.new);
+          if (transformedPlayer.id === playerId) {
+            setCurrentPlayer(transformedPlayer);
           } else {
-            setOpponent(payload.new);
+            setOpponent(transformedPlayer);
           }
           
           return newPlayers;
