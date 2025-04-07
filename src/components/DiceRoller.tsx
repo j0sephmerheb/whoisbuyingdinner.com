@@ -2,10 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/context/GameContext';
+import { Shield } from 'lucide-react';
 
 const DiceRoller = () => {
-  const { gameState, rollDice } = useGame();
-  const { userDiceValue, systemDiceValue, gamePhase } = gameState;
+  const { gameState, rollDice, useSpecialPower } = useGame();
+  const { userDiceValue, systemDiceValue, gamePhase, specialPowerAvailable } = gameState;
 
   const isRolling = gamePhase === 'rolling';
   const canRoll = gamePhase === 'playing';
@@ -38,7 +39,7 @@ const DiceRoller = () => {
           </div>
         </div>
         
-        <div className="flex flex-col items-center justify-center p-2">
+        <div className="flex flex-col items-center justify-center p-2 gap-3">
           <Button 
             onClick={rollDice} 
             disabled={!canRoll || isRolling}
@@ -46,6 +47,16 @@ const DiceRoller = () => {
           >
             {isRolling ? 'Rolling...' : showResults ? 'Wait...' : 'Roll Dice'}
           </Button>
+          
+          {specialPowerAvailable && (
+            <Button 
+              onClick={useSpecialPower}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-2"
+            >
+              <Shield size={16} />
+              Use Special Power (+2 bonus)
+            </Button>
+          )}
         </div>
         
         <div className="flex flex-col items-center gap-2">
