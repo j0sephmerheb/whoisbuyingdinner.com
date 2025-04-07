@@ -17,6 +17,7 @@ export const useGameSubscriptions = (
   // Use refs to avoid creating new interval functions on each render
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const countdownStartedRef = useRef<boolean>(false);
+  const gamePhaseRef = useRef<string | null>(null);
 
   // Clean up any existing interval when component unmounts
   useEffect(() => {
@@ -25,6 +26,8 @@ export const useGameSubscriptions = (
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+      // Reset countdown flag on unmount
+      countdownStartedRef.current = false;
     };
   }, []);
 
@@ -39,10 +42,15 @@ export const useGameSubscriptions = (
       if (payload.new) {
         setGame(payload.new);
         
-        // Handle game phase changes
-        if (payload.new.game_phase === 'playing' && 
-            (payload.old?.game_phase === 'waiting' ||
-             payload.old?.game_phase === 'selection') && 
+        // Store the current game phase to compare later
+        const oldPhase = gamePhaseRef.current;
+        const newPhase = payload.new.game_phase;
+        gamePhaseRef.current = newPhase;
+        
+        // Handle game phase changes - Only trigger countdown if phase just changed to 'playing'
+        // and we haven't already started a countdown
+        if (newPhase === 'playing' && 
+            (oldPhase === 'waiting' || oldPhase === 'selection') && 
             !countdownStartedRef.current) {
           // Only start countdown if we haven't already started one
           countdownStartedRef.current = true;
@@ -135,6 +143,7 @@ export const useGameSubscriptions = (
     return () => {
       // Reset countdown flag on cleanup
       countdownStartedRef.current = false;
+      gamePhaseRef.current = null;
       
       // Clear interval on cleanup
       if (intervalRef.current) {

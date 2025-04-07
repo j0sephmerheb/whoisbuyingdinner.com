@@ -20,7 +20,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
   isCurrentPlayer
 }) => {
   const isRolling = gamePhase === 'rolling';
-  const canRoll = gamePhase === 'playing';
+  const canRoll = gamePhase === 'playing' || gamePhase === 'rolling';
   const showResults = gamePhase === 'result';
 
   const userDiceValue = currentPlayer.dice_value;
@@ -44,9 +44,9 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
     }
   };
 
-  const canPlayerRoll = isCurrentPlayer && canRoll && !userDiceValue;
-  const canOpponentRoll = !isCurrentPlayer && canRoll && !opponentDiceValue;
-
+  // Each player can only roll their own dice
+  const canPlayerRoll = isCurrentPlayer && canRoll && userDiceValue === null;
+  
   return (
     <div className="flex flex-col items-center justify-center gap-6 my-6 relative">
       <h2 className="text-2xl font-bold text-gray-800">Roll The Dice</h2>
@@ -70,21 +70,29 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
           {canPlayerRoll && (
             <Button 
               onClick={onRoll} 
-              disabled={!canRoll || isRolling || userDiceValue !== null}
-              className={`bg-gameAccent hover:bg-gameAccent/80 px-4 py-2 text-md h-auto mt-2 ${isRolling ? 'opacity-50' : ''}`}
+              disabled={!canRoll || userDiceValue !== null}
+              className={`bg-gameAccent hover:bg-gameAccent/80 px-4 py-2 text-md h-auto mt-2 ${userDiceValue !== null ? 'opacity-50' : ''}`}
             >
               Roll Your Dice
             </Button>
           )}
-          {!canPlayerRoll && userDiceValue && canRoll && (
+          {!canPlayerRoll && userDiceValue !== null && (
             <span className="text-sm text-green-600 mt-2">You've rolled!</span>
+          )}
+          {!canPlayerRoll && userDiceValue === null && isCurrentPlayer && (
+            <span className="text-sm text-amber-600 mt-2">Waiting to roll...</span>
           )}
         </div>
         
         <div className="flex flex-col items-center justify-center p-2 gap-3">
           <div className="bg-white/80 px-4 py-2 rounded-lg text-center">
             {isRolling ? (
-              <span className="text-amber-600 font-medium">Rolling...</span>
+              <span className="text-amber-600 font-medium">
+                {userDiceValue === null && opponentDiceValue === null ? 'Time to roll!' : 
+                 userDiceValue !== null && opponentDiceValue === null ? 'Waiting for opponent...' :
+                 userDiceValue === null && opponentDiceValue !== null ? 'Your turn to roll!' : 
+                 'Both players rolled!'}
+              </span>
             ) : showResults ? (
               <span className="font-medium">Results shown</span>
             ) : canRoll ? (
@@ -110,17 +118,20 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
           >
             {getDiceIcon(opponentDiceValue) || getDiceFace(opponentDiceValue)}
           </div>
-          {canOpponentRoll && (
+          {!isCurrentPlayer && canRoll && opponentDiceValue === null && (
             <Button 
               onClick={onRoll} 
-              disabled={!canRoll || isRolling || opponentDiceValue !== null}
-              className={`bg-gameAccent hover:bg-gameAccent/80 px-4 py-2 text-md h-auto mt-2 ${isRolling ? 'opacity-50' : ''}`}
+              disabled={!canRoll || opponentDiceValue !== null}
+              className={`bg-gameAccent hover:bg-gameAccent/80 px-4 py-2 text-md h-auto mt-2 ${opponentDiceValue !== null ? 'opacity-50' : ''}`}
             >
               Roll Your Dice
             </Button>
           )}
-          {!canOpponentRoll && opponentDiceValue && canRoll && (
+          {opponentDiceValue !== null && (
             <span className="text-sm text-green-600 mt-2">Opponent has rolled!</span>
+          )}
+          {opponentDiceValue === null && !isCurrentPlayer && (
+            <span className="text-sm text-amber-600 mt-2">Waiting to roll...</span>
           )}
         </div>
       </div>
