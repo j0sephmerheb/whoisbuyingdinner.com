@@ -15,6 +15,7 @@ export interface GameData {
   winner_id?: string;
   loser_id?: string;
   is_locked: boolean;
+  players?: PlayerData[];
 }
 
 export interface PlayerData {
@@ -274,6 +275,20 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
     await supabase.from('games').delete().eq('id', gameId);
   }, 60000); // Delete after 1 minute to allow users to see results
   
+  return true;
+};
+
+// Reset dice value
+export const resetDiceValue = async (playerId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('players')
+    .update({ dice_value: null })
+    .eq('id', playerId);
+
+  if (error) {
+    console.error("Error resetting dice value:", error);
+    return false;
+  }
   return true;
 };
 

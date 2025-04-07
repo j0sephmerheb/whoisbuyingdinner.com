@@ -1,0 +1,85 @@
+
+import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import * as gameService from '@/services/gameService';
+import { GameData, PlayerData } from '@/services/gameService';
+
+export const useGameSubscriptions = (
+  gameId: string | undefined,
+  playerId: string | undefined,
+  setGame: React.Dispatch<React.SetStateAction<GameData | null>>,
+  setPlayers: React.Dispatch<React.SetStateAction<PlayerData[]>>,
+  setCurrentPlayer: React.Dispatch<React.SetStateAction<PlayerData | null>>,
+  setOpponent: React.Dispatch<React.SetStateAction<PlayerData | null>>,
+  setCountdownValue: React.Dispatch<React.SetStateAction<number>>,
+  setIsCountingDown: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  useEffect(() => {
+    if (!gameId) return;
+    
+    // Set up real-time listeners
+    const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
+      if (payload.new) {
+        setGame(payload.new);
+        
+        // Handle game phase changes
+        if (payload.new.game_phase === 'playing' && 
+            (payload.old?.game_phase === 'waiting' ||
+             payload.old?.game_phase === 'selection')) {
+          // This would be when we just transitioned from waiting/selection to playing
+          // We'll start countdown here for non-host players
+          let count = 5;
+          setCountdownValue(count);
+          setIsCountingDown(true);
+          
+          const interval = setInterval(() => {
+            count--;
+            setCountdownValue(count);
+            
+            if (count <= 0) {
+              clearInterval(interval);
+              setIsCountingDown(false);
+            }
+          }, 1000);
+        }
+      }
+    });
+    
+    const playersChannel = gameService.subscribeToPlayers(gameId, (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        setPlayers(prev => {
+          const newPlayers = [...prev];
+          const index = newPlayers.findIndex(p => p.id === payload.new.id);
+          
+          // Convert character_data from Json to typed array if needed
+          const newPlayerData = {
+            ...payload.new,
+            character_data: Array.isArray(payload.new.character_data) 
+              ? payload.new.character_data 
+              : Array(5).fill(null).map((_, id) => ({ alive: true, id }))
+          } as PlayerData;
+          
+          if (index !== -1) {
+            newPlayers[index] = newPlayerData;
+          } else {
+            newPlayers.push(newPlayerData);
+          }
+          
+          // Update current player and opponent references
+          if (payload.new.id === playerId) {
+            setCurrentPlayer(newPlayerData);
+          } else {
+            setOpponent(newPlayerData);
+          }
+          
+          return newPlayers;
+        });
+      }
+    });
+    
+    return () => {
+      gameChannel.unsubscribe();
+      playersChannel.unsubscribe();
+    };
+  }, [gameId, playerId, setGame, setPlayers, setCurrentPlayer, setOpponent, setCountdownValue, setIsCountingDown]);
+};
