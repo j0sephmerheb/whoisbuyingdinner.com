@@ -9,7 +9,80 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      games: {
+        Row: {
+          created_at: string
+          current_round: number
+          game_phase: Database["public"]["Enums"]["game_phase"]
+          id: string
+          is_locked: boolean
+          loser_id: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          current_round?: number
+          game_phase?: Database["public"]["Enums"]["game_phase"]
+          id?: string
+          is_locked?: boolean
+          loser_id?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          current_round?: number
+          game_phase?: Database["public"]["Enums"]["game_phase"]
+          id?: string
+          is_locked?: boolean
+          loser_id?: string | null
+          winner_id?: string | null
+        }
+        Relationships: []
+      }
+      players: {
+        Row: {
+          character_data: Json
+          character_type: Database["public"]["Enums"]["character_type"]
+          created_at: string
+          dice_value: number | null
+          game_id: string
+          id: string
+          is_host: boolean
+          name: string
+          score: number
+        }
+        Insert: {
+          character_data?: Json
+          character_type: Database["public"]["Enums"]["character_type"]
+          created_at?: string
+          dice_value?: number | null
+          game_id: string
+          id?: string
+          is_host?: boolean
+          name: string
+          score?: number
+        }
+        Update: {
+          character_data?: Json
+          character_type?: Database["public"]["Enums"]["character_type"]
+          created_at?: string
+          dice_value?: number | null
+          game_id?: string
+          id?: string
+          is_host?: boolean
+          name?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "players_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +91,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      character_type: "cowboy" | "ninja" | "fireman" | "santa"
+      game_phase:
+        | "waiting"
+        | "selection"
+        | "playing"
+        | "rolling"
+        | "result"
+        | "over"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +213,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      character_type: ["cowboy", "ninja", "fireman", "santa"],
+      game_phase: [
+        "waiting",
+        "selection",
+        "playing",
+        "rolling",
+        "result",
+        "over",
+      ],
+    },
   },
 } as const
