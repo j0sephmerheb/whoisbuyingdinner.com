@@ -126,7 +126,10 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
   // Lock the game since we now have 2 players
   await supabase
     .from('games')
-    .update({ is_locked: true })
+    .update({ 
+      is_locked: true,
+      game_phase: 'selection' // Update game phase to selection when second player joins
+    })
     .eq('id', gameId);
 
   return playerData.id;

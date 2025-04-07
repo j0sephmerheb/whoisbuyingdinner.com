@@ -30,8 +30,11 @@ export const useGameSubscriptions = (
   useEffect(() => {
     if (!gameId) return;
     
+    console.log("Setting up game subscriptions for game:", gameId);
+    
     // Set up real-time listeners
     const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
+      console.log("Game update received:", payload);
       if (payload.new) {
         setGame(payload.new);
         
@@ -68,6 +71,7 @@ export const useGameSubscriptions = (
     });
     
     const playersChannel = gameService.subscribeToPlayers(gameId, (payload) => {
+      console.log("Player update received:", payload);
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
         setPlayers(prev => {
           const newPlayers = [...prev];
@@ -95,6 +99,31 @@ export const useGameSubscriptions = (
           }
           
           return newPlayers;
+        });
+        
+        // Check if both players joined, and if so, ensure game phase is 'selection'
+        setPlayers(currentPlayers => {
+          if (currentPlayers.length === 2) {
+            setGame(currentGame => {
+              if (currentGame && currentGame.game_phase === 'waiting') {
+                console.log("Both players joined via subscription, updating game phase to selection");
+                supabase
+                  .from('games')
+                  .update({ game_phase: 'selection' })
+                  .eq('id', gameId)
+                  .then(() => {
+                    console.log("Game phase updated to selection");
+                  })
+                  .catch(err => {
+                    console.error("Error updating game phase:", err);
+                  });
+                  
+                return { ...currentGame, game_phase: 'selection' };
+              }
+              return currentGame;
+            });
+          }
+          return currentPlayers;
         });
       }
     });

@@ -19,6 +19,7 @@ export const useGameDataLoader = (
     
     const loadGameData = async () => {
       setLoading(true);
+      console.log("Loading game data for game:", gameId, "player:", playerId);
       
       try {
         // Get game data
@@ -29,6 +30,8 @@ export const useGameDataLoader = (
           .single();
         
         if (gameError) throw new Error(gameError.message);
+        
+        console.log("Game data:", gameData);
         setGame(gameData);
         
         // Get players data
@@ -38,6 +41,7 @@ export const useGameDataLoader = (
           .eq('game_id', gameId);
         
         if (playersError) throw new Error(playersError.message);
+        console.log("Players data:", playersData);
         
         // Convert the Json character_data to the correct type
         const typedPlayersData = playersData.map(player => ({
@@ -56,7 +60,20 @@ export const useGameDataLoader = (
         const other = typedPlayersData.find(p => p.id !== playerId);
         if (other) setOpponent(other);
         
+        // If both players joined but game is still in waiting phase, update to selection phase
+        if (gameData.game_phase === 'waiting' && typedPlayersData.length === 2) {
+          console.log("Both players joined but game is still in waiting phase, updating to selection");
+          await supabase
+            .from('games')
+            .update({ game_phase: 'selection' })
+            .eq('id', gameId);
+            
+          // Update local state as well
+          setGame(prev => prev ? { ...prev, game_phase: 'selection' } : null);
+        }
+        
       } catch (err: any) {
+        console.error("Error loading game data:", err);
         setError(err.message);
         toast.error('Error loading game data');
       } finally {
