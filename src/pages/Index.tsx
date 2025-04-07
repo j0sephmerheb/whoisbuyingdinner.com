@@ -1,14 +1,9 @@
 
 import React from 'react';
-import { GameProvider } from '@/context/GameContext';
-import Game from '@/pages/Game';
+import Home from './Home';
 
 const Index = () => {
-  return (
-    <GameProvider>
-      <Game />
-    </GameProvider>
-  );
+  return <Home />;
 };
 
 export default Index;

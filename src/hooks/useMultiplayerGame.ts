@@ -1,0 +1,260 @@
+
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import * as gameService from '@/services/gameService';
+import { Team } from '@/types/gameTypes';
+import { useNavigate } from 'react-router-dom';
+
+export const useMultiplayerGame = (
+  gameId?: string,
+  playerId?: string
+) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [game, setGame] = useState<gameService.GameData | null>(null);
+  const [players, setPlayers] = useState<gameService.PlayerData[]>([]);
+  const [currentPlayer, setCurrentPlayer] = useState<gameService.PlayerData | null>(null);
+  const [opponent, setOpponent] = useState<gameService.PlayerData | null>(null);
+
+  // Create a new game
+  const createGame = async (playerName: string) => {
+    setLoading(true);
+    const result = await gameService.createGame(playerName);
+    setLoading(false);
+    
+    if (result) {
+      navigate(`/game/${result.gameId}/${result.playerId}`);
+      return result;
+    } else {
+      setError('Failed to create game');
+      return null;
+    }
+  };
+
+  // Join an existing game
+  const joinGame = async (gameId: string, playerName: string) => {
+    setLoading(true);
+    const playerId = await gameService.joinGame(gameId, playerName);
+    setLoading(false);
+    
+    if (playerId) {
+      navigate(`/game/${gameId}/${playerId}`);
+      return playerId;
+    } else {
+      setError('Failed to join game');
+      return null;
+    }
+  };
+
+  // Start game
+  const startGame = async () => {
+    if (!game) return false;
+    
+    const result = await gameService.startGame(game.id);
+    if (!result) {
+      toast.error('Failed to start game');
+    }
+    return result;
+  };
+
+  // Select team
+  const selectTeam = async (team: Team) => {
+    if (!currentPlayer) return false;
+    
+    const result = await gameService.selectTeam(currentPlayer.id, team);
+    if (!result) {
+      toast.error('Failed to select team');
+    } else {
+      toast.success(`You selected Team ${team === 'chicken' ? 'Chicken! 🐔' : 'Cowboy! 🤠'}`);
+    }
+    return result;
+  };
+
+  // Roll dice
+  const rollDice = async () => {
+    if (!currentPlayer || !game || game.game_phase !== 'playing') return;
+    
+    // Update game phase to rolling
+    await gameService.updateGamePhase(game.id, 'rolling');
+    
+    // Simulate dice roll with delay
+    setTimeout(async () => {
+      const value = await gameService.rollDice(currentPlayer.id);
+      
+      // After both players have rolled, determine the winner
+      setTimeout(() => {
+        if (players.every(p => p.dice_value !== null)) {
+          gameService.updateGamePhase(game.id, 'result');
+          
+          // After showing result, process the round outcome
+          setTimeout(() => {
+            processRoundOutcome();
+          }, 2000);
+        }
+      }, 500);
+    }, 1500);
+  };
+
+  // Process the outcome of a round
+  const processRoundOutcome = async () => {
+    if (!currentPlayer || !opponent || !game) return;
+    
+    const userRoll = currentPlayer.dice_value || 0;
+    const opponentRoll = opponent.dice_value || 0;
+    
+    // Determine who won the round
+    if (userRoll > opponentRoll) {
+      // Player wins
+      const updatedCharacters = [...opponent.character_data];
+      // Find first alive character and eliminate it
+      const aliveIndex = updatedCharacters.findIndex(c => c.alive);
+      if (aliveIndex !== -1) {
+        updatedCharacters[aliveIndex].alive = false;
+      }
+      
+      await gameService.updatePlayerAfterRound(
+        opponent.id,
+        opponent.score,
+        updatedCharacters
+      );
+      
+      toast.success("You won this round!");
+    } else if (userRoll < opponentRoll) {
+      // Opponent wins
+      const updatedCharacters = [...currentPlayer.character_data];
+      // Find first alive character and eliminate it
+      const aliveIndex = updatedCharacters.findIndex(c => c.alive);
+      if (aliveIndex !== -1) {
+        updatedCharacters[aliveIndex].alive = false;
+      }
+      
+      await gameService.updatePlayerAfterRound(
+        currentPlayer.id,
+        currentPlayer.score,
+        updatedCharacters
+      );
+      
+      toast.error("You lost this round!");
+    } else {
+      // Tie
+      toast.info("It's a tie!");
+    }
+    
+    // Reset dice values
+    await Promise.all([
+      supabase.from('players').update({ dice_value: null }).eq('id', currentPlayer.id),
+      supabase.from('players').update({ dice_value: null }).eq('id', opponent.id)
+    ]);
+    
+    // Check if game is over
+    const playerAliveCount = currentPlayer.character_data.filter(c => c.alive).length;
+    const opponentAliveCount = opponent.character_data.filter(c => c.alive).length;
+    
+    if (playerAliveCount === 0 || opponentAliveCount === 0) {
+      const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
+      const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
+      
+      await gameService.endGame(game.id, winnerId, loserId);
+    } else {
+      // Move to next round
+      await gameService.updateGamePhase(game.id, 'playing');
+    }
+  };
+
+  // Load game data
+  useEffect(() => {
+    if (!gameId || !playerId) return;
+    
+    const loadGameData = async () => {
+      setLoading(true);
+      
+      try {
+        // Get game data
+        const { data: gameData, error: gameError } = await supabase
+          .from('games')
+          .select()
+          .eq('id', gameId)
+          .single();
+        
+        if (gameError) throw new Error(gameError.message);
+        setGame(gameData);
+        
+        // Get players data
+        const { data: playersData, error: playersError } = await supabase
+          .from('players')
+          .select()
+          .eq('game_id', gameId);
+        
+        if (playersError) throw new Error(playersError.message);
+        setPlayers(playersData);
+        
+        // Set current player and opponent
+        const current = playersData.find(p => p.id === playerId);
+        if (current) setCurrentPlayer(current);
+        
+        const other = playersData.find(p => p.id !== playerId);
+        if (other) setOpponent(other);
+        
+      } catch (err: any) {
+        setError(err.message);
+        toast.error('Error loading game data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadGameData();
+    
+    // Set up real-time listeners
+    const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
+      if (payload.new) {
+        setGame(payload.new);
+      }
+    });
+    
+    const playersChannel = gameService.subscribeToPlayers(gameId, (payload) => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        setPlayers(prev => {
+          const newPlayers = [...prev];
+          const index = newPlayers.findIndex(p => p.id === payload.new.id);
+          
+          if (index !== -1) {
+            newPlayers[index] = payload.new;
+          } else {
+            newPlayers.push(payload.new);
+          }
+          
+          // Update current player and opponent references
+          if (payload.new.id === playerId) {
+            setCurrentPlayer(payload.new);
+          } else {
+            setOpponent(payload.new);
+          }
+          
+          return newPlayers;
+        });
+      }
+    });
+    
+    return () => {
+      gameChannel.unsubscribe();
+      playersChannel.unsubscribe();
+    };
+  }, [gameId, playerId]);
+
+  return {
+    loading,
+    error,
+    game,
+    players,
+    currentPlayer,
+    opponent,
+    createGame,
+    joinGame,
+    startGame,
+    selectTeam,
+    rollDice
+  };
+};

@@ -1,14 +1,19 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useGame } from '@/context/GameContext';
+import { useNavigate } from 'react-router-dom';
+import { CharacterType } from '@/services/gameService';
 
-const GameOver = () => {
-  const { gameState, resetGame } = useGame();
-  const { winner, userTeam } = gameState;
+interface GameOverProps {
+  winner: CharacterType | undefined;
+  userTeam: CharacterType;
+}
+
+const GameOver: React.FC<GameOverProps> = ({ winner, userTeam }) => {
+  const navigate = useNavigate();
   
   const userWon = winner === userTeam;
-  const isTie = winner === 'tie';
+  const isTie = !winner;
   
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -34,10 +39,10 @@ const GameOver = () => {
         </p>
         
         <Button 
-          onClick={resetGame} 
+          onClick={() => navigate('/')} 
           className="bg-gameAccent hover:bg-gameAccent/80 w-full py-6 text-xl h-auto"
         >
-          Play Again
+          New Game
         </Button>
       </div>
     </div>

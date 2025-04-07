@@ -1,11 +1,13 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useGame } from '@/context/GameContext';
+import { Team } from '@/types/gameTypes';
 
-const TeamSelection = () => {
-  const { setUserTeam } = useGame();
+interface TeamSelectionProps {
+  onSelect: (team: Team) => void;
+}
 
+const TeamSelection: React.FC<TeamSelectionProps> = ({ onSelect }) => {
   return (
     <div className="flex flex-col items-center gap-8 p-8">
       <h1 className="text-4xl font-bold text-gameAccent mb-2">Choose Your Team</h1>
@@ -13,7 +15,7 @@ const TeamSelection = () => {
       <div className="flex flex-col md:flex-row gap-8 w-full max-w-2xl">
         <div 
           className="flex-1 bg-chicken rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-gameAccent"
-          onClick={() => setUserTeam('chicken')}
+          onClick={() => onSelect('chicken')}
         >
           <div className="flex flex-col items-center gap-4">
             <div className="h-32 w-32 flex items-center justify-center bg-white rounded-full shadow-inner">
@@ -23,7 +25,7 @@ const TeamSelection = () => {
             <p className="text-center text-gray-700">Armed with explosive eggs and plenty of cluck</p>
             <Button 
               className="w-full bg-gameAccent hover:bg-gameAccent/80 text-white font-bold" 
-              onClick={() => setUserTeam('chicken')}
+              onClick={() => onSelect('chicken')}
             >
               Select Chickens
             </Button>
@@ -32,7 +34,7 @@ const TeamSelection = () => {
         
         <div 
           className="flex-1 bg-cowboy rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer border-2 border-transparent hover:border-gameAccent"
-          onClick={() => setUserTeam('cowboy')}
+          onClick={() => onSelect('cowboy')}
         >
           <div className="flex flex-col items-center gap-4">
             <div className="h-32 w-32 flex items-center justify-center bg-white rounded-full shadow-inner">
@@ -42,7 +44,7 @@ const TeamSelection = () => {
             <p className="text-center text-gray-700">Ready to throw whiskey bottles with deadly aim</p>
             <Button 
               className="w-full bg-gameAccent hover:bg-gameAccent/80 text-white font-bold" 
-              onClick={() => setUserTeam('cowboy')}
+              onClick={() => onSelect('cowboy')}
             >
               Select Cowboys
             </Button>
@@ -54,7 +56,7 @@ const TeamSelection = () => {
         <h3 className="text-xl font-semibold mb-2">Game Rules</h3>
         <ul className="list-disc pl-6 space-y-1">
           <li>You'll have 5 characters on your team</li>
-          <li>Each round, roll your dice against the computer</li>
+          <li>Each round, roll your dice against your opponent</li>
           <li>Highest roll gets to attack and eliminate one opponent</li>
           <li>Last team with characters standing wins!</li>
         </ul>

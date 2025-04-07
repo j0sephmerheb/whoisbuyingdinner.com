@@ -1,13 +1,21 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useGame } from '@/context/GameContext';
-import { Shield } from 'lucide-react';
+import { GamePhase } from '@/services/gameService';
 
-const DiceRoller = () => {
-  const { gameState, rollDice, useSpecialPower } = useGame();
-  const { userDiceValue, systemDiceValue, gamePhase, specialPowerAvailable } = gameState;
+interface DiceRollerProps {
+  gamePhase: GamePhase;
+  userDiceValue: number | null;
+  systemDiceValue: number | null;
+  onRoll: () => void;
+}
 
+const DiceRoller: React.FC<DiceRollerProps> = ({ 
+  gamePhase, 
+  userDiceValue, 
+  systemDiceValue, 
+  onRoll 
+}) => {
   const isRolling = gamePhase === 'rolling';
   const canRoll = gamePhase === 'playing';
   const showResults = gamePhase === 'result';
@@ -41,26 +49,16 @@ const DiceRoller = () => {
         
         <div className="flex flex-col items-center justify-center p-2 gap-3">
           <Button 
-            onClick={rollDice} 
+            onClick={onRoll} 
             disabled={!canRoll || isRolling}
             className={`bg-gameAccent hover:bg-gameAccent/80 px-8 py-6 text-xl h-auto ${isRolling || !canRoll ? 'opacity-50' : ''}`}
           >
             {isRolling ? 'Rolling...' : showResults ? 'Wait...' : 'Roll Dice'}
           </Button>
-          
-          {specialPowerAvailable && (
-            <Button 
-              onClick={useSpecialPower}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white flex items-center gap-2"
-            >
-              <Shield size={16} />
-              Use Special Power (+2 bonus)
-            </Button>
-          )}
         </div>
         
         <div className="flex flex-col items-center gap-2">
-          <span className="text-lg font-semibold">Computer Roll</span>
+          <span className="text-lg font-semibold">Opponent Roll</span>
           <div 
             className={`w-20 h-20 flex items-center justify-center text-3xl font-bold bg-white border-4
               ${userDiceValue && systemDiceValue && systemDiceValue > userDiceValue 
@@ -82,7 +80,7 @@ const DiceRoller = () => {
           {userDiceValue > systemDiceValue ? (
             <span className="font-semibold text-green-600">You win this round!</span>
           ) : userDiceValue < systemDiceValue ? (
-            <span className="font-semibold text-red-600">Computer wins this round!</span>
+            <span className="font-semibold text-red-600">Opponent wins this round!</span>
           ) : (
             <span className="font-semibold text-yellow-600">It's a tie!</span>
           )}
