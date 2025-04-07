@@ -1,23 +1,48 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/context/GameContext';
+import ThrowingAnimation from './ThrowingAnimation';
 
 const DiceRoller = () => {
   const { gameState, rollDice } = useGame();
-  const { userDiceValue, systemDiceValue, gamePhase } = gameState;
+  const { userDiceValue, systemDiceValue, gamePhase, userTeam } = gameState;
+  const [showAnimation, setShowAnimation] = useState(false);
+  const [winner, setWinner] = useState<'user' | 'system' | null>(null);
 
   const isRolling = gamePhase === 'rolling';
   const canRoll = gamePhase === 'playing';
   const showResults = gamePhase === 'result';
+
+  // Determine the winner and show animation if needed
+  React.useEffect(() => {
+    if (showResults && userDiceValue !== null && systemDiceValue !== null) {
+      if (userDiceValue > systemDiceValue) {
+        setWinner('user');
+        setShowAnimation(true);
+      } else if (systemDiceValue > userDiceValue) {
+        setWinner('system');
+        setShowAnimation(true);
+      }
+    }
+  }, [gamePhase, userDiceValue, systemDiceValue, showResults]);
 
   const getDiceFace = (value: number | null) => {
     if (value === null) return '?';
     return value;
   };
 
+  // Determine which team is throwing (chicken or cowboy)
+  const getAttacker = (): 'chicken' | 'cowboy' => {
+    if (winner === 'user') {
+      return userTeam as 'chicken' | 'cowboy';
+    } else {
+      return userTeam === 'chicken' ? 'cowboy' : 'chicken';
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center gap-6 my-6">
+    <div className="flex flex-col items-center justify-center gap-6 my-6 relative">
       <h2 className="text-2xl font-bold text-gray-800">Roll The Dice</h2>
       
       <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -76,6 +101,15 @@ const DiceRoller = () => {
             <span className="font-semibold text-yellow-600">It's a tie!</span>
           )}
         </div>
+      )}
+      
+      {/* Animation Component */}
+      {showAnimation && winner && (
+        <ThrowingAnimation 
+          attacker={getAttacker()} 
+          show={showAnimation}
+          onComplete={() => setShowAnimation(false)}
+        />
       )}
     </div>
   );

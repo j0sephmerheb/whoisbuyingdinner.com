@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 type Team = 'chicken' | 'cowboy';
 type Character = { alive: boolean, id: number };
+type GamePhase = 'selection' | 'playing' | 'rolling' | 'result' | 'over';
 
 interface GameState {
   userTeam: Team | null;
@@ -12,7 +13,7 @@ interface GameState {
   systemCharacters: Character[];
   userDiceValue: number | null;
   systemDiceValue: number | null;
-  gamePhase: 'selection' | 'playing' | 'rolling' | 'result' | 'over';
+  gamePhase: GamePhase;
   winner: Team | 'tie' | null;
 }
 
@@ -53,7 +54,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     setGameState(prev => ({
       ...prev,
-      gamePhase: 'rolling',
+      gamePhase: 'rolling' as GamePhase,
       userDiceValue: null,
       systemDiceValue: null,
     }));
@@ -69,7 +70,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...prev,
           userDiceValue: userRoll,
           systemDiceValue: systemRoll,
-          gamePhase: 'result',
+          gamePhase: 'result' as GamePhase,
         };
         
         return newState;
@@ -130,7 +131,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Check if game is over
       let winner: Team | 'tie' | null = null;
-      let newGamePhase: 'playing' | 'over' = 'playing';
+      let newGamePhase: GamePhase = 'playing';
       
       if (userAliveCount === 0 || systemAliveCount === 0) {
         newGamePhase = 'over';
