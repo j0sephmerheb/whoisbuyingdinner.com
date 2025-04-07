@@ -108,6 +108,7 @@ const Game = () => {
     currentPlayer,
     opponent,
     countdownValue,
+    isCountingDown,
     selectAvatar,
     startCountdown,
     rollDice
@@ -182,7 +183,7 @@ const Game = () => {
           />
         )}
         
-        {game_phase === 'countdown' && (
+        {isCountingDown && (
           <Countdown value={countdownValue} />
         )}
         
