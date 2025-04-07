@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
+import { useParams } from 'react-router-dom';
 
 const Home = () => {
   const [playerName, setPlayerName] = useState('');
-  const [gameId, setGameId] = useState('');
-  const [createMode, setCreateMode] = useState(true);
-  const [joining, setJoining] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const { gameId } = useParams();
   
   const { createGame, joinGame } = useMultiplayerGame();
   
@@ -20,18 +20,18 @@ const Home = () => {
       return;
     }
     
-    setJoining(true);
+    setCreating(true);
     
     try {
-      if (createMode) {
-        await createGame(playerName);
+      if (gameId) {
+        // Join existing game with URL
+        await joinGame(gameId, playerName);
       } else {
-        if (gameId.trim()) {
-          await joinGame(gameId, playerName);
-        }
+        // Create new game
+        await createGame(playerName);
       }
     } finally {
-      setJoining(false);
+      setCreating(false);
     }
   };
   
@@ -39,16 +39,16 @@ const Home = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gameBackground p-4">
       <div className="w-full max-w-md">
         <h1 className="text-4xl font-bold text-center text-gameAccent mb-8">
-          Chicken-Cowboy Dice Duel
+          Who's Buying Dinner?
         </h1>
         
         <Card>
           <CardHeader>
-            <CardTitle>{createMode ? 'Create New Game' : 'Join Existing Game'}</CardTitle>
+            <CardTitle>{gameId ? 'Join Game' : 'Create New Game'}</CardTitle>
             <CardDescription>
-              {createMode 
-                ? 'Start a new multiplayer game and invite a friend' 
-                : 'Enter a game ID to join an existing game'}
+              {gameId 
+                ? 'Enter your name to join this game' 
+                : 'Start a new game and invite a friend to play'}
             </CardDescription>
           </CardHeader>
           
@@ -67,45 +67,26 @@ const Home = () => {
                 />
               </div>
               
-              {!createMode && (
-                <div>
-                  <label htmlFor="gameId" className="block text-sm font-medium mb-1">
-                    Game ID
-                  </label>
-                  <Input
-                    id="gameId"
-                    value={gameId}
-                    onChange={(e) => setGameId(e.target.value)}
-                    placeholder="Enter game ID"
-                    required
-                  />
+              {gameId && (
+                <div className="bg-gameAccent/10 p-3 rounded-md">
+                  <p className="text-sm">
+                    You're joining a game created by someone else.
+                  </p>
                 </div>
               )}
             </CardContent>
             
-            <CardFooter className="flex flex-col space-y-3">
+            <CardFooter>
               <Button 
                 type="submit" 
                 className="w-full bg-gameAccent hover:bg-gameAccent/80"
-                disabled={joining}
+                disabled={creating}
               >
-                {joining 
+                {creating 
                   ? 'Processing...' 
-                  : createMode 
-                    ? 'Create Game' 
-                    : 'Join Game'}
-              </Button>
-              
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => setCreateMode(!createMode)}
-                disabled={joining}
-              >
-                {createMode 
-                  ? 'Join Existing Game Instead' 
-                  : 'Create New Game Instead'}
+                  : gameId 
+                    ? 'Join Game' 
+                    : 'Create Game'}
               </Button>
             </CardFooter>
           </form>

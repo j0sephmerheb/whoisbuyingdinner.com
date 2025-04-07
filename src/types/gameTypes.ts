@@ -1,7 +1,9 @@
 
-export type Team = 'chicken' | 'cowboy';
+import { CharacterType } from '@/services/gameService';
+
+export type Team = CharacterType;
 export type Character = { alive: boolean, id: number };
-export type GamePhase = 'selection' | 'playing' | 'rolling' | 'result' | 'over';
+export type GamePhase = 'selection' | 'countdown' | 'playing' | 'rolling' | 'result' | 'over';
 
 export interface GameState {
   userTeam: Team | null;

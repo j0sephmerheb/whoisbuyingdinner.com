@@ -1,26 +1,12 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Team } from '@/types/gameTypes';
 import { Json } from '@/integrations/supabase/types';
 
 // Types for our database schema
-export type GamePhase = 'waiting' | 'selection' | 'playing' | 'rolling' | 'result' | 'over';
+export type GamePhase = 'waiting' | 'selection' | 'countdown' | 'playing' | 'rolling' | 'result' | 'over';
 // Match to Supabase database enum type
 export type DBCharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa';
-// Our game only uses cowboy and chicken (ninja repurposed as chicken)
-export type CharacterType = 'chicken' | 'cowboy';
-
-// Helper function to map between our game types and database types
-export const mapToDBCharacterType = (gameType: CharacterType): DBCharacterType => {
-  if (gameType === 'chicken') return 'ninja';
-  return gameType;
-};
-
-export const mapFromDBCharacterType = (dbType: DBCharacterType): CharacterType => {
-  if (dbType === 'ninja') return 'chicken';
-  if (dbType === 'fireman' || dbType === 'santa') return 'cowboy';
-  return dbType;
-};
+export type CharacterType = DBCharacterType;
 
 export interface GameData {
   id: string;
@@ -58,13 +44,13 @@ export const createGame = async (playerName: string): Promise<{ gameId: string, 
     return null;
   }
 
-  // Then create the host player - using ninja as our database representation for chicken
+  // Then create the host player
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
       name: playerName,
       game_id: gameData.id,
-      character_type: 'ninja', // Default, will be changed during selection
+      character_type: 'cowboy', // Default, will be changed during selection
       is_host: true,
       character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
     }])
@@ -99,13 +85,29 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
     return null;
   }
 
-  // Create the player - using ninja as our database representation for chicken
+  // Check if game already has 2 players
+  const { count, error: countError } = await supabase
+    .from('players')
+    .select('*', { count: 'exact', head: true })
+    .eq('game_id', gameId);
+
+  if (countError) {
+    console.error("Error counting players:", countError);
+    return null;
+  }
+
+  if (count && count >= 2) {
+    console.error("Game already has maximum players");
+    return null;
+  }
+
+  // Create the player
   const { data: playerData, error: playerError } = await supabase
     .from('players')
     .insert([{
       name: playerName,
       game_id: gameId,
-      character_type: 'ninja', // Default, will be changed during selection
+      character_type: 'cowboy', // Default, will be changed during selection
       is_host: false,
       character_data: Array(5).fill(null).map((_, id) => ({ alive: true, id }))
     }])
@@ -117,31 +119,65 @@ export const joinGame = async (gameId: string, playerName: string): Promise<stri
     return null;
   }
 
+  // Lock the game since we now have 2 players
+  await supabase
+    .from('games')
+    .update({ is_locked: true })
+    .eq('id', gameId);
+
   return playerData.id;
 };
 
-// Select team
-export const selectTeam = async (playerId: string, team: Team): Promise<boolean> => {
-  // Map our game type to database type
-  const dbCharacterType = mapToDBCharacterType(team as CharacterType);
-
+// Select avatar
+export const selectAvatar = async (playerId: string, avatarType: CharacterType): Promise<boolean> => {
   const { error } = await supabase
     .from('players')
-    .update({ character_type: dbCharacterType })
+    .update({ character_type: avatarType })
     .eq('id', playerId);
 
   if (error) {
-    console.error("Error selecting team:", error);
+    console.error("Error selecting avatar:", error);
     return false;
   }
   return true;
 };
 
-// Start the game (transition from waiting to selection)
+// Check if all players have selected avatars
+export const checkAvatarSelection = async (gameId: string): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from('players')
+    .select('character_type')
+    .eq('game_id', gameId);
+
+  if (error || !data) {
+    console.error("Error checking avatar selection:", error);
+    return false;
+  }
+
+  // Check if all players have selected their avatars (not the default)
+  const allSelected = data.every(player => player.character_type !== null);
+  return allSelected;
+};
+
+// Start countdown
+export const startCountdown = async (gameId: string): Promise<boolean> => {
+  const { error } = await supabase
+    .from('games')
+    .update({ game_phase: 'countdown' })
+    .eq('id', gameId);
+
+  if (error) {
+    console.error("Error starting countdown:", error);
+    return false;
+  }
+  return true;
+};
+
+// Start the game
 export const startGame = async (gameId: string): Promise<boolean> => {
   const { error } = await supabase
     .from('games')
-    .update({ game_phase: 'selection' })
+    .update({ game_phase: 'playing' })
     .eq('id', gameId);
 
   if (error) {
@@ -218,6 +254,15 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
     console.error("Error ending game:", error);
     return false;
   }
+  
+  // After the game is over and results are shown, delete the game and players (after a timeout)
+  setTimeout(async () => {
+    // Delete players first (due to foreign key constraints)
+    await supabase.from('players').delete().eq('game_id', gameId);
+    // Then delete the game
+    await supabase.from('games').delete().eq('id', gameId);
+  }, 60000); // Delete after 1 minute to allow users to see results
+  
   return true;
 };
 

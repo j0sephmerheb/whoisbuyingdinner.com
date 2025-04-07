@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/gameService';
-import { Team } from '@/types/gameTypes';
 import { useNavigate } from 'react-router-dom';
 
 export const useMultiplayerGame = (
@@ -17,6 +16,7 @@ export const useMultiplayerGame = (
   const [players, setPlayers] = useState<gameService.PlayerData[]>([]);
   const [currentPlayer, setCurrentPlayer] = useState<gameService.PlayerData | null>(null);
   const [opponent, setOpponent] = useState<gameService.PlayerData | null>(null);
+  const [countdownValue, setCountdownValue] = useState(5);
 
   // Create a new game
   const createGame = async (playerName: string) => {
@@ -48,26 +48,33 @@ export const useMultiplayerGame = (
     }
   };
 
-  // Start game
-  const startGame = async () => {
-    if (!game) return false;
+  // Select avatar
+  const selectAvatar = async (avatarType: gameService.CharacterType) => {
+    if (!currentPlayer) return false;
     
-    const result = await gameService.startGame(game.id);
+    const result = await gameService.selectAvatar(currentPlayer.id, avatarType);
     if (!result) {
-      toast.error('Failed to start game');
+      toast.error('Failed to select avatar');
+    } else {
+      toast.success(`You selected ${avatarType}!`);
     }
     return result;
   };
 
-  // Select team
-  const selectTeam = async (team: Team) => {
-    if (!currentPlayer) return false;
+  // Start countdown
+  const startCountdown = async () => {
+    if (!game) return false;
     
-    const result = await gameService.selectTeam(currentPlayer.id, team);
+    // First check if all players have selected avatars
+    const allSelected = await gameService.checkAvatarSelection(game.id);
+    if (!allSelected) {
+      toast.error('All players must select an avatar first');
+      return false;
+    }
+    
+    const result = await gameService.startCountdown(game.id);
     if (!result) {
-      toast.error('Failed to select team');
-    } else {
-      toast.success(`You selected Team ${team === 'chicken' ? 'Chicken! 🐔' : 'Cowboy! 🤠'}`);
+      toast.error('Failed to start countdown');
     }
     return result;
   };
@@ -188,20 +195,13 @@ export const useMultiplayerGame = (
           .eq('game_id', gameId);
         
         if (playersError) throw new Error(playersError.message);
-        
-        // Transform the character_type from database enum to our game types
-        const transformedPlayers = playersData.map(player => ({
-          ...player,
-          character_type: gameService.mapFromDBCharacterType(player.character_type)
-        })) as gameService.PlayerData[];
-        
-        setPlayers(transformedPlayers);
+        setPlayers(playersData);
         
         // Set current player and opponent
-        const current = transformedPlayers.find(p => p.id === playerId);
+        const current = playersData.find(p => p.id === playerId);
         if (current) setCurrentPlayer(current);
         
-        const other = transformedPlayers.find(p => p.id !== playerId);
+        const other = playersData.find(p => p.id !== playerId);
         if (other) setOpponent(other);
         
       } catch (err: any) {
@@ -218,6 +218,23 @@ export const useMultiplayerGame = (
     const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
       if (payload.new) {
         setGame(payload.new);
+        
+        // Start countdown timer if game phase is countdown
+        if (payload.new.game_phase === 'countdown' && payload.old.game_phase !== 'countdown') {
+          let count = 5;
+          setCountdownValue(count);
+          
+          const interval = setInterval(() => {
+            count--;
+            setCountdownValue(count);
+            
+            if (count <= 0) {
+              clearInterval(interval);
+              // Start the game after countdown
+              gameService.startGame(gameId);
+            }
+          }, 1000);
+        }
       }
     });
     
@@ -227,23 +244,17 @@ export const useMultiplayerGame = (
           const newPlayers = [...prev];
           const index = newPlayers.findIndex(p => p.id === payload.new.id);
           
-          // Transform the character_type from database enum to our game types
-          const transformedPlayer = {
-            ...payload.new,
-            character_type: gameService.mapFromDBCharacterType(payload.new.character_type)
-          } as gameService.PlayerData;
-          
           if (index !== -1) {
-            newPlayers[index] = transformedPlayer;
+            newPlayers[index] = payload.new;
           } else {
-            newPlayers.push(transformedPlayer);
+            newPlayers.push(payload.new);
           }
           
           // Update current player and opponent references
-          if (transformedPlayer.id === playerId) {
-            setCurrentPlayer(transformedPlayer);
+          if (payload.new.id === playerId) {
+            setCurrentPlayer(payload.new);
           } else {
-            setOpponent(transformedPlayer);
+            setOpponent(payload.new);
           }
           
           return newPlayers;
@@ -264,10 +275,11 @@ export const useMultiplayerGame = (
     players,
     currentPlayer,
     opponent,
+    countdownValue,
     createGame,
     joinGame,
-    startGame,
-    selectTeam,
+    selectAvatar,
+    startCountdown,
     rollDice
   };
 };

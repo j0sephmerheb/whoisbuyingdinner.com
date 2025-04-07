@@ -7,13 +7,22 @@ import { CharacterType } from '@/services/gameService';
 interface GameOverProps {
   winner: CharacterType | undefined;
   userTeam: CharacterType;
+  winnerName: string;
+  loserName: string;
 }
 
-const GameOver: React.FC<GameOverProps> = ({ winner, userTeam }) => {
+const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loserName }) => {
   const navigate = useNavigate();
   
   const userWon = winner === userTeam;
   const isTie = !winner;
+  
+  const emojiMap: Record<CharacterType, string> = {
+    cowboy: '🤠',
+    ninja: '🥷',
+    fireman: '👨‍🚒',
+    santa: '🎅'
+  };
   
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -23,20 +32,13 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam }) => {
         </h2>
         
         <div className="text-6xl my-6">
-          {userWon 
-            ? userTeam === 'chicken' ? '🐔' : '🤠'
-            : isTie 
-              ? '🐔🤠' 
-              : userTeam === 'chicken' ? '🤠' : '🐔'}
+          {winner && emojiMap[winner]}
         </div>
         
-        <p className="text-lg mb-6">
-          {userWon 
-            ? `Your ${userTeam === 'chicken' ? 'chickens' : 'cowboys'} are victorious!` 
-            : isTie 
-              ? 'Both teams fought with equal skill!'
-              : `The ${userTeam === 'chicken' ? 'cowboys' : 'chickens'} have defeated you!`}
-        </p>
+        <div className="text-xl mb-6">
+          <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
+          <p>{loserName} is buying dinner tonight!</p>
+        </div>
         
         <Button 
           onClick={() => navigate('/')} 
