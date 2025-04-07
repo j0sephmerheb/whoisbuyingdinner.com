@@ -1,11 +1,22 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as gameService from '@/services/gameService';
 import { GameData } from '@/services/gameService';
 
 export const useGameCountdown = (game: GameData | null) => {
   const [countdownValue, setCountdownValue] = useState(5);
   const [isCountingDown, setIsCountingDown] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   // Start countdown
   const startCountdown = async () => {
@@ -17,17 +28,25 @@ export const useGameCountdown = (game: GameData | null) => {
       return false;
     }
     
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
     // Start local countdown
     setIsCountingDown(true);
     let count = 5;
     setCountdownValue(count);
     
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       count--;
       setCountdownValue(count);
       
       if (count <= 0) {
-        clearInterval(interval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
         setIsCountingDown(false);
         
         // Actually start the game by updating the game phase to 'playing'

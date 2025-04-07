@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/gameService';
 import { GameData, PlayerData } from '@/services/gameService';
@@ -14,6 +14,19 @@ export const useGameSubscriptions = (
   setCountdownValue: React.Dispatch<React.SetStateAction<number>>,
   setIsCountingDown: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
+  // Use refs to avoid creating new interval functions on each render
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up any existing interval when component unmounts
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!gameId) return;
     
@@ -28,16 +41,25 @@ export const useGameSubscriptions = (
              payload.old?.game_phase === 'selection')) {
           // This would be when we just transitioned from waiting/selection to playing
           // We'll start countdown here for non-host players
+          
+          // Clear any existing interval first
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          
           let count = 5;
           setCountdownValue(count);
           setIsCountingDown(true);
           
-          const interval = setInterval(() => {
+          intervalRef.current = setInterval(() => {
             count--;
             setCountdownValue(count);
             
             if (count <= 0) {
-              clearInterval(interval);
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
               setIsCountingDown(false);
             }
           }, 1000);
@@ -78,6 +100,13 @@ export const useGameSubscriptions = (
     });
     
     return () => {
+      // Clear interval on cleanup
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      
+      // Unsubscribe from channels
       gameChannel.unsubscribe();
       playersChannel.unsubscribe();
     };
