@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Egg, Bottle } from 'lucide-react';
+import { Egg, Beer } from 'lucide-react';
 
 interface ThrowingAnimationProps {
   attacker: 'chicken' | 'cowboy';
@@ -36,7 +36,7 @@ const ThrowingAnimation: React.FC<ThrowingAnimationProps> = ({ attacker, show, o
         {attacker === 'chicken' ? (
           <Egg size={48} className="text-white fill-white" />
         ) : (
-          <Bottle size={48} className="text-amber-700 rotate-45" />
+          <Beer size={48} className="text-amber-700 rotate-45" />
         )}
       </motion.div>
     </div>

@@ -104,7 +104,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (userTeamIsChicken) {
               toast("Your chicken launched an egg! A cowboy is down!");
             } else {
-              toast("Your cowboy threw a whiskey bottle! A chicken is down!");
+              toast("Your cowboy threw a beer bottle! A chicken is down!");
             }
           }
         } else {
@@ -115,7 +115,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             
             // Show appropriate toast based on user's team
             if (userTeamIsChicken) {
-              toast("Enemy cowboy threw a whiskey bottle! A chicken is down!");
+              toast("Enemy cowboy threw a beer bottle! A chicken is down!");
             } else {
               toast("Enemy chicken launched an egg! A cowboy is down!");
             }
