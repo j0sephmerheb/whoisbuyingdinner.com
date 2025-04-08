@@ -1,5 +1,4 @@
 
-
 import { supabase } from '@/integrations/supabase/client';
 import { GamePhase } from './types';
 
@@ -72,4 +71,3 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
   // We no longer delete games - they just remain in the 'over' state
   return true;
 };
-

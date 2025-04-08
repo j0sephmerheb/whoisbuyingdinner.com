@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import * as gameService from '@/services/game';
@@ -84,15 +85,15 @@ export const usePlayerActions = (
       const aliveIndex = updatedCharacters.findIndex(c => c.alive);
       if (aliveIndex !== -1) {
         updatedCharacters[aliveIndex].alive = false;
+        
+        await gameService.updatePlayerAfterRound(
+          opponent.id,
+          opponent.score,
+          updatedCharacters
+        );
+        
+        toast.success("You won this round!");
       }
-      
-      await gameService.updatePlayerAfterRound(
-        opponent.id,
-        opponent.score,
-        updatedCharacters
-      );
-      
-      toast.success("You won this round!");
     } else if (userRoll < opponentRoll) {
       // Opponent wins
       const updatedCharacters = [...currentPlayer.character_data];
@@ -100,15 +101,15 @@ export const usePlayerActions = (
       const aliveIndex = updatedCharacters.findIndex(c => c.alive);
       if (aliveIndex !== -1) {
         updatedCharacters[aliveIndex].alive = false;
+        
+        await gameService.updatePlayerAfterRound(
+          currentPlayer.id,
+          currentPlayer.score,
+          updatedCharacters
+        );
+        
+        toast.error("You lost this round!");
       }
-      
-      await gameService.updatePlayerAfterRound(
-        currentPlayer.id,
-        currentPlayer.score,
-        updatedCharacters
-      );
-      
-      toast.error("You lost this round!");
     } else {
       // Tie
       toast.info("It's a tie!");
@@ -125,6 +126,7 @@ export const usePlayerActions = (
     const opponentAliveCount = opponent.character_data.filter(c => c.alive).length;
     
     if (playerAliveCount === 0 || opponentAliveCount === 0) {
+      // Correctly determine the winner and loser
       const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
       const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
       
