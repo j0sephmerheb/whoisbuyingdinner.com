@@ -1,8 +1,7 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { CharacterType } from '@/services/gameService';
+import { CharacterType } from '@/services/game';
 
 interface GameOverProps {
   winner: CharacterType | undefined;

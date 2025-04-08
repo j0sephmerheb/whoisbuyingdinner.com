@@ -1,7 +1,6 @@
-
 import { useState, useRef, useEffect } from 'react';
-import * as gameService from '@/services/gameService';
-import { GameData } from '@/services/gameService';
+import * as gameService from '@/services/game';
+import { GameData } from '@/services/game';
 
 export const useGameCountdown = (game: GameData | null) => {
   const [countdownValue, setCountdownValue] = useState(5);

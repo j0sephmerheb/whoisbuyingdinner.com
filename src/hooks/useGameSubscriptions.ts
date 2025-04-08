@@ -1,8 +1,7 @@
-
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import * as gameService from '@/services/gameService';
-import { GameData, PlayerData } from '@/services/gameService';
+import * as gameService from '@/services/game';
+import { GameData, PlayerData } from '@/services/game';
 
 export const useGameSubscriptions = (
   gameId: string | undefined,

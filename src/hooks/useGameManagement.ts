@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import * as gameService from '@/services/gameService';
+import * as gameService from '@/services/game';
 
 export const useGameManagement = () => {
   const navigate = useNavigate();

@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { useGameManagement } from './useGameManagement';
 import { usePlayerActions } from './usePlayerActions';
 import { useGameCountdown } from './useGameCountdown';
 import { useGameDataLoader } from './useGameDataLoader';
 import { useGameSubscriptions } from './useGameSubscriptions';
-import * as gameService from '@/services/gameService';
+import * as gameService from '@/services/game';
 
 export const useMultiplayerGame = (
   gameId?: string,

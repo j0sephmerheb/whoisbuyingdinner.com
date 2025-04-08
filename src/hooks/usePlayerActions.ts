@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
-import * as gameService from '@/services/gameService';
-import { GameData, PlayerData, CharacterType, GamePhase } from '@/services/gameService';
+import * as gameService from '@/services/game';
+import { GameData, PlayerData, CharacterType, GamePhase } from '@/services/game';
 
 export const usePlayerActions = (
   game: GameData | null,

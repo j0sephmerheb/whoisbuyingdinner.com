@@ -1,5 +1,4 @@
-
-import { CharacterType } from '@/services/gameService';
+import { CharacterType } from '@/services/game';
 
 export type Team = CharacterType;
 export type Character = { alive: boolean, id: number };

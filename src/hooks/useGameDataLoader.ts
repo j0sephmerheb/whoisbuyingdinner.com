@@ -1,8 +1,7 @@
-
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { GameData, PlayerData } from '@/services/gameService';
+import { GameData, PlayerData } from '@/services/game';
 
 export const useGameDataLoader = (
   gameId: string | undefined,

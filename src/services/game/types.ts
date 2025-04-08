@@ -1,0 +1,29 @@
+
+// Types for our database schema
+export type GamePhase = 'waiting' | 'selection' | 'playing' | 'rolling' | 'result' | 'over';
+// Match to Supabase database enum type
+export type DBCharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa';
+export type CharacterType = DBCharacterType;
+
+export interface GameData {
+  id: string;
+  created_at: string;
+  current_round: number;
+  game_phase: GamePhase;
+  winner_id?: string;
+  loser_id?: string;
+  is_locked: boolean;
+  players?: PlayerData[];
+}
+
+export interface PlayerData {
+  id: string;
+  created_at: string;
+  name: string;
+  game_id: string;
+  character_type: CharacterType;
+  is_host: boolean;
+  score: number;
+  dice_value: number | null;
+  character_data: Array<{ alive: boolean, id: number }>;
+}
