@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createDefaultGameState, resolveRoundOutcome } from '@/utils/gameUtils';
 import { Character, GameState, Team, GamePhase } from '@/types/gameTypes';
 import { toast } from 'sonner';
-import { CharacterType } from '@/services/gameService';
+import { CharacterType } from '@/services/game';
 
 interface GameContextType {
   gameState: GameState;

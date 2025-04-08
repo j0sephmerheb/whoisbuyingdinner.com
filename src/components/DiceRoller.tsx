@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { GamePhase, PlayerData } from '@/services/gameService';
+import { GamePhase, PlayerData } from '@/services/game';
 import { Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react';
 
 interface DiceRollerProps {

@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { GameState, Team } from '@/types/gameTypes';
 import { createDefaultGameState, resolveRoundOutcome } from '@/utils/gameUtils';
 import { toast } from 'sonner';
-import { CharacterType } from '@/services/gameService';
+import { CharacterType } from '@/services/game';
 
 export const useGameActions = () => {
   const [gameState, setGameState] = useState<GameState>(createDefaultGameState());

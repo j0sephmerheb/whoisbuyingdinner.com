@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { PlayerData } from '@/services/gameService';
+import { PlayerData } from '@/services/game';
 
 interface GameBoardProps {
   currentPlayer: PlayerData;
