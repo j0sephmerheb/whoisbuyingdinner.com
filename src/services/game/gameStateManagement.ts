@@ -54,6 +54,8 @@ export const updateGamePhase = async (gameId: string, phase: GamePhase): Promise
 
 // End the game
 export const endGame = async (gameId: string, winnerId: string, loserId: string): Promise<boolean> => {
+  console.log(`Ending game: ${gameId}, Winner: ${winnerId}, Loser: ${loserId}`);
+  
   const { error } = await supabase
     .from('games')
     .update({ 

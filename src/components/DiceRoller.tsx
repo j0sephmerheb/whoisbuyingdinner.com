@@ -31,7 +31,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
     return value;
   };
 
-  const getDiceIcon = (value: number | null, size = 24) => {
+  const getDiceIcon = (value: number | null, size = 48) => {
     if (value === null) return null;
     switch(value) {
       case 1: return <Dice1 size={size} />;
@@ -55,17 +55,16 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Your Roll</span>
           <div 
-            className={`w-20 h-20 flex items-center justify-center text-3xl font-bold bg-white border-4 
+            className={`w-28 h-28 flex items-center justify-center text-4xl font-bold bg-white border-4 
               ${userDiceValue && opponentDiceValue && userDiceValue > opponentDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && userDiceValue < opponentDiceValue 
                   ? 'border-red-500' 
                   : 'border-gameAccent'} 
               rounded-xl shadow-md
-              ${isRolling && !userDiceValue ? 'animate-dice-roll' : ''}
             `}
           >
-            {getDiceIcon(userDiceValue) || getDiceFace(userDiceValue)}
+            {getDiceIcon(userDiceValue, 48) || getDiceFace(userDiceValue)}
           </div>
           {canPlayerRoll && (
             <Button 
@@ -106,17 +105,16 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Opponent Roll</span>
           <div 
-            className={`w-20 h-20 flex items-center justify-center text-3xl font-bold bg-white border-4
+            className={`w-28 h-28 flex items-center justify-center text-4xl font-bold bg-white border-4
               ${userDiceValue && opponentDiceValue && opponentDiceValue > userDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && opponentDiceValue < userDiceValue 
                   ? 'border-red-500' 
                   : 'border-gameAccent'} 
               rounded-xl shadow-md
-              ${isRolling && !opponentDiceValue ? 'animate-dice-roll' : ''}
             `}
           >
-            {getDiceIcon(opponentDiceValue) || getDiceFace(opponentDiceValue)}
+            {getDiceIcon(opponentDiceValue, 48) || getDiceFace(opponentDiceValue)}
           </div>
           {!isCurrentPlayer && canRoll && opponentDiceValue === null && (
             <Button 

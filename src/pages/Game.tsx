@@ -104,8 +104,6 @@ const Game = () => {
     players, 
     currentPlayer,
     opponent,
-    countdownValue,
-    isCountingDown,
     selectAvatar,
     startCountdown,
     rollDice
@@ -188,10 +186,6 @@ const Game = () => {
           />
         )}
         
-        {isCountingDown && (
-          <Countdown value={countdownValue} />
-        )}
-        
         {(game_phase === 'playing' || game_phase === 'rolling' || game_phase === 'result') && (
           <div className="flex flex-col items-center">
             <div className="flex items-center justify-between w-full mb-4">
@@ -224,10 +218,11 @@ const Game = () => {
       
       {game_phase === 'over' && (
         <GameOver 
-          winner={game.winner_id === playerId ? currentPlayer.character_type : opponent?.character_type} 
+          winner={game.winner_id === currentPlayer.id ? currentPlayer.character_type : opponent?.character_type} 
           userTeam={currentPlayer.character_type}
-          winnerName={game.winner_id === playerId ? currentPlayer.name : (opponent?.name || 'Opponent')}
-          loserName={game.loser_id === playerId ? currentPlayer.name : (opponent?.name || 'Opponent')}
+          winnerName={game.winner_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
+          loserName={game.loser_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
+          onPlayAgain={() => navigate('/')}
         />
       )}
     </div>

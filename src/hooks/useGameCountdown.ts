@@ -1,27 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+
+import { useState } from 'react';
 import * as gameService from '@/services/game';
 import { GameData } from '@/services/game';
 
 export const useGameCountdown = (game: GameData | null) => {
-  const [countdownValue, setCountdownValue] = useState(5);
+  const [countdownValue, setCountdownValue] = useState(0);
   const [isCountingDown, setIsCountingDown] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownStartedRef = useRef<boolean>(false);
 
-  // Clear interval on unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      countdownStartedRef.current = false;
-    };
-  }, []);
-
-  // Start countdown
+  // Start countdown - we'll just start the game without countdown now
   const startCountdown = async () => {
-    if (!game || countdownStartedRef.current) return false;
+    if (!game) return false;
     
     // First check if all players have selected avatars
     const allSelected = await gameService.checkAvatarSelection(game.id);
@@ -29,37 +17,8 @@ export const useGameCountdown = (game: GameData | null) => {
       return false;
     }
     
-    // Set flag to prevent multiple countdowns
-    countdownStartedRef.current = true;
-    
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    // Tell server to start the game (server will broadcast to other clients)
+    // Tell server to start the game without countdown
     await gameService.startGame(game.id);
-    
-    // Start local countdown immediately instead of waiting for server response
-    console.log("Starting local countdown");
-    setIsCountingDown(true);
-    let count = 5;
-    setCountdownValue(count);
-    
-    intervalRef.current = setInterval(() => {
-      count--;
-      setCountdownValue(count);
-      
-      if (count <= 0) {
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-        setIsCountingDown(false);
-        countdownStartedRef.current = false;
-      }
-    }, 1000);
-    
     return true;
   };
 
