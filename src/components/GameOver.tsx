@@ -37,8 +37,15 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
         </div>
         
         <div className="text-xl mb-6">
-          <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
-          <p className="text-2xl my-4">{loserName} is buying dinner tonight!</p>
+          {winner && (
+            <>
+              <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
+              <p className="text-2xl my-4">{loserName} is buying dinner tonight!</p>
+            </>
+          )}
+          {!winner && (
+            <p className="text-2xl my-4">It's a tie! Split the bill!</p>
+          )}
         </div>
         
         <div className="flex flex-col gap-3">

@@ -79,7 +79,7 @@ export const usePlayerActions = (
     
     console.log(`Processing round outcome - User roll: ${userRoll}, Opponent roll: ${opponentRoll}`);
     
-    // Determine who won the round - correctly comparing dice values
+    // Determine round winner based on dice values
     if (userRoll > opponentRoll) {
       // Current player wins
       const updatedCharacters = [...opponent.character_data];

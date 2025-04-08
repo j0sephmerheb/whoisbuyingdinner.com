@@ -31,7 +31,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
     return value;
   };
 
-  const getDiceIcon = (value: number | null, size = 48) => {
+  const getDiceIcon = (value: number | null, size = 64) => {
     if (value === null) return null;
     switch(value) {
       case 1: return <Dice1 size={size} />;
@@ -55,7 +55,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Your Roll</span>
           <div 
-            className={`w-28 h-28 flex items-center justify-center text-4xl font-bold bg-white border-4 
+            className={`w-36 h-36 flex items-center justify-center text-4xl font-bold bg-white border-4 
               ${userDiceValue && opponentDiceValue && userDiceValue > opponentDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && userDiceValue < opponentDiceValue 
@@ -64,7 +64,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
               rounded-xl shadow-md
             `}
           >
-            {getDiceIcon(userDiceValue, 48) || getDiceFace(userDiceValue)}
+            {getDiceIcon(userDiceValue, 64) || getDiceFace(userDiceValue)}
           </div>
           {canPlayerRoll && (
             <Button 
@@ -105,7 +105,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Opponent Roll</span>
           <div 
-            className={`w-28 h-28 flex items-center justify-center text-4xl font-bold bg-white border-4
+            className={`w-36 h-36 flex items-center justify-center text-4xl font-bold bg-white border-4
               ${userDiceValue && opponentDiceValue && opponentDiceValue > userDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && opponentDiceValue < userDiceValue 
@@ -114,7 +114,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
               rounded-xl shadow-md
             `}
           >
-            {getDiceIcon(opponentDiceValue, 48) || getDiceFace(opponentDiceValue)}
+            {getDiceIcon(opponentDiceValue, 64) || getDiceFace(opponentDiceValue)}
           </div>
           {!isCurrentPlayer && canRoll && opponentDiceValue === null && (
             <Button 
