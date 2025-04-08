@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,9 +27,16 @@ export const useGameDataLoader = (
           .from('games')
           .select()
           .eq('id', gameId)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single to prevent error
         
         if (gameError) throw new Error(gameError.message);
+        
+        // If game not found, set appropriate error
+        if (!gameData) {
+          setError("Game not found or has ended");
+          setLoading(false);
+          return;
+        }
         
         console.log("Game data:", gameData);
         setGame(gameData);
@@ -41,6 +49,13 @@ export const useGameDataLoader = (
         
         if (playersError) throw new Error(playersError.message);
         console.log("Players data:", playersData);
+        
+        // If no players found, handle gracefully
+        if (!playersData || playersData.length === 0) {
+          setError("Game session expired or has been removed");
+          setLoading(false);
+          return;
+        }
         
         // Convert the Json character_data to the correct type
         const typedPlayersData = playersData.map(player => ({
