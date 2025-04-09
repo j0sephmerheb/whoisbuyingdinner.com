@@ -38,6 +38,8 @@ export const rollDice = async (playerId: string): Promise<number> => {
   // Generate a random dice value between 1 and 6
   const diceValue = Math.floor(Math.random() * 6) + 1;
   
+  console.log(`[API] Player ${playerId} rolling dice, value: ${diceValue}`);
+  
   // Update the player's dice value in the database
   const { error } = await supabase
     .from('players')
@@ -45,7 +47,7 @@ export const rollDice = async (playerId: string): Promise<number> => {
     .eq('id', playerId);
 
   if (error) {
-    console.error("Error rolling dice:", error);
+    console.error("[API] Error rolling dice:", error);
     return 0;
   }
   
@@ -54,13 +56,15 @@ export const rollDice = async (playerId: string): Promise<number> => {
 
 // Reset dice value
 export const resetDiceValue = async (playerId: string): Promise<boolean> => {
+  console.log(`[API] Resetting dice for player ${playerId}`);
+  
   const { error } = await supabase
     .from('players')
     .update({ dice_value: null })
     .eq('id', playerId);
 
   if (error) {
-    console.error("Error resetting dice value:", error);
+    console.error("[API] Error resetting dice value:", error);
     return false;
   }
   return true;
@@ -72,6 +76,8 @@ export const updatePlayerAfterRound = async (
   newScore: number, 
   characterData: Array<{ alive: boolean, id: number }>
 ): Promise<boolean> => {
+  console.log(`[API] Updating player ${playerId}, new score: ${newScore}, character data:`, characterData);
+  
   const { error } = await supabase
     .from('players')
     .update({ 
@@ -81,7 +87,7 @@ export const updatePlayerAfterRound = async (
     .eq('id', playerId);
 
   if (error) {
-    console.error("Error updating player after round:", error);
+    console.error("[API] Error updating player after round:", error);
     return false;
   }
   return true;
