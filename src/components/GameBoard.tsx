@@ -38,7 +38,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className={`p-4 ${userTeamColor} shadow-lg border-none`}>
           <h3 className="text-xl font-bold mb-3">
-            {currentPlayer.name} ({currentPlayer.character_type})
+            {currentPlayer.name}
           </h3>
           <div className="flex justify-center gap-2">
             {currentPlayer.character_data.map((character, index) => (
@@ -62,7 +62,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
         
         <Card className={`p-4 ${opponentTeamColor} shadow-lg border-none`}>
           <h3 className="text-xl font-bold mb-3">
-            {opponent?.name || 'Opponent'} ({opponent?.character_type || '???'})
+            {opponent?.name || 'Opponent'}
           </h3>
           <div className="flex justify-center gap-2">
             {opponent?.character_data.map((character, index) => (

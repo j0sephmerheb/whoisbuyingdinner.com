@@ -38,7 +38,7 @@ const Home = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gameBackground p-4">
       <div className="w-full max-w-md">
-        <h1 className="text-4xl font-bold text-center text-gameAccent mb-8">
+        <h1 className="text-4xl font-bold text-center text-gameAccent mb- w-full">
           Who's Buying Dinner?
         </h1>
         

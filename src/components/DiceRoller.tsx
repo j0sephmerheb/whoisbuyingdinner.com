@@ -48,9 +48,22 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
   
   return (
     <div className="flex flex-col items-center justify-center gap-6 my-6 relative">
-      <h2 className="text-2xl font-bold text-gray-800">Roll The Dice</h2>
+      <h2 className="text-2xl font-bold text-gray-800">
+        {isRolling ? (
+          <span className="text-amber-600 font-medium">
+            {userDiceValue === null && opponentDiceValue === null ? 'Time to roll!' : 
+              userDiceValue !== null && opponentDiceValue === null ? 'Waiting for opponent...' :
+              userDiceValue === null && opponentDiceValue !== null ? 'Your turn to roll!' : 
+              'Both players rolled!'}
+          </span>
+        ) : canRoll ? (
+          <span className="font-medium">Time to roll!</span>
+        ) : (
+          <span className="font-medium">Waiting...</span>
+        )}
+      </h2>
       
-      <div className="flex flex-row md:flex-row gap-8 items-center">
+      <div className="flex flex-row md:flex-row gap-10 items-start">
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Your Roll</span>
           <div 
@@ -81,24 +94,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
             <span className="text-sm text-amber-600 mt-2">Waiting to roll...</span>
           )}
         </div>
-        
-        <div className="flex flex-col items-center justify-center p-2 gap-3">
-          <div className="bg-white/80 px-4 py-2 rounded-lg text-center">
-            {isRolling ? (
-              <span className="text-amber-600 font-medium">
-                {userDiceValue === null && opponentDiceValue === null ? 'Time to roll!' : 
-                 userDiceValue !== null && opponentDiceValue === null ? 'Waiting for opponent...' :
-                 userDiceValue === null && opponentDiceValue !== null ? 'Your turn to roll!' : 
-                 'Both players rolled!'}
-              </span>
-            ) : canRoll ? (
-              <span className="font-medium">Time to roll!</span>
-            ) : (
-              <span className="font-medium">Waiting...</span>
-            )}
-          </div>
-        </div>
-        
+ 
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Opponent Roll</span>
           <div 
