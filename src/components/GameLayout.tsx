@@ -9,7 +9,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gameBackground p-4">
       <header className="w-full max-w-5xl flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gameAccent">Who's Buying Dinner?</h1>
+        <h1 className="text-3xl font-bold text-gameAccent text-center">Who's Buying Dinner?</h1>
       </header>
       
       <main className="w-full max-w-5xl bg-white/90 rounded-2xl shadow-xl p-6 flex-1">

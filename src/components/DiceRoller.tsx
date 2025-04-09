@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { GamePhase, PlayerData } from '@/services/game';
@@ -51,7 +50,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
     <div className="flex flex-col items-center justify-center gap-6 my-6 relative">
       <h2 className="text-2xl font-bold text-gray-800">Roll The Dice</h2>
       
-      <div className="flex flex-col md:flex-row gap-8 items-center">
+      <div className="flex flex-row md:flex-row gap-8 items-center">
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Your Roll</span>
           <div 
@@ -92,8 +91,6 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
                  userDiceValue === null && opponentDiceValue !== null ? 'Your turn to roll!' : 
                  'Both players rolled!'}
               </span>
-            ) : showResults ? (
-              <span className="font-medium">Results shown</span>
             ) : canRoll ? (
               <span className="font-medium">Time to roll!</span>
             ) : (
