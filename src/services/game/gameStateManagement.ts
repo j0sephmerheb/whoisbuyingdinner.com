@@ -40,21 +40,25 @@ export const startGame = async (gameId: string): Promise<boolean> => {
 
 // Update game phase
 export const updateGamePhase = async (gameId: string, phase: GamePhase): Promise<boolean> => {
+  console.log(`[GAME STATE] Updating game ${gameId} phase to ${phase}`);
+  
   const { error } = await supabase
     .from('games')
     .update({ game_phase: phase })
     .eq('id', gameId);
 
   if (error) {
-    console.error("Error updating game phase:", error);
+    console.error(`[GAME STATE] Error updating game phase to ${phase}:`, error);
     return false;
   }
+  
+  console.log(`[GAME STATE] Successfully updated game phase to ${phase}`);
   return true;
 };
 
 // End the game
 export const endGame = async (gameId: string, winnerId: string, loserId: string): Promise<boolean> => {
-  console.log(`Ending game: ${gameId}, Winner: ${winnerId}, Loser: ${loserId}`);
+  console.log(`[GAME STATE] Ending game: ${gameId}, Winner: ${winnerId}, Loser: ${loserId}`);
   
   const { error } = await supabase
     .from('games')
@@ -66,10 +70,10 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
     .eq('id', gameId);
 
   if (error) {
-    console.error("Error ending game:", error);
+    console.error("[GAME STATE] Error ending game:", error);
     return false;
   }
   
-  // We no longer delete games - they just remain in the 'over' state
+  console.log(`[GAME STATE] Successfully ended game ${gameId}`);
   return true;
 };
