@@ -137,17 +137,9 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
       {showResults && userDiceValue && opponentDiceValue && (
         <div className="bg-white/90 p-3 rounded-lg shadow mt-2 text-center">
           {userDiceValue > opponentDiceValue ? (
-            isCurrentPlayer ? (
-              <span className="font-semibold text-green-600">You win this round!</span>
-            ) : (
-              <span className="font-semibold text-red-600">Opponent wins this round!</span>
-            )
+            <span className="font-semibold text-green-600">You win this round!</span>
           ) : userDiceValue < opponentDiceValue ? (
-            isCurrentPlayer ? (
-              <span className="font-semibold text-red-600">Opponent wins this round!</span>
-            ) : (
-              <span className="font-semibold text-green-600">You win this round!</span>
-            )
+            <span className="font-semibold text-red-600">You lost this round!</span>
           ) : (
             <span className="font-semibold text-yellow-600">It's a tie!</span>
           )}
