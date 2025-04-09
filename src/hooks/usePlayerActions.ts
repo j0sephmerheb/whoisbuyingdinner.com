@@ -79,41 +79,41 @@ export const usePlayerActions = (
     
     console.log(`Processing round outcome - User roll: ${userRoll}, Opponent roll: ${opponentRoll}`);
     
-    // Determine round winner based on dice values
+    // Fix: Determine round winner based on dice values
     if (userRoll > opponentRoll) {
-      // Current player wins
-      const updatedCharacters = [...opponent.character_data];
+      // Current player wins - opponent loses a character
+      const updatedOpponentCharacters = [...opponent.character_data];
       // Find first alive character and eliminate it
-      const aliveIndex = updatedCharacters.findIndex(c => c.alive);
+      const aliveIndex = updatedOpponentCharacters.findIndex(c => c.alive);
       if (aliveIndex !== -1) {
-        updatedCharacters[aliveIndex].alive = false;
+        updatedOpponentCharacters[aliveIndex].alive = false;
         
         await gameService.updatePlayerAfterRound(
           opponent.id,
           opponent.score,
-          updatedCharacters
+          updatedOpponentCharacters
         );
         
         toast.success("You won this round!");
       }
     } else if (userRoll < opponentRoll) {
-      // Opponent wins
-      const updatedCharacters = [...currentPlayer.character_data];
+      // Opponent wins - current player loses a character
+      const updatedUserCharacters = [...currentPlayer.character_data];
       // Find first alive character and eliminate it
-      const aliveIndex = updatedCharacters.findIndex(c => c.alive);
+      const aliveIndex = updatedUserCharacters.findIndex(c => c.alive);
       if (aliveIndex !== -1) {
-        updatedCharacters[aliveIndex].alive = false;
+        updatedUserCharacters[aliveIndex].alive = false;
         
         await gameService.updatePlayerAfterRound(
           currentPlayer.id,
           currentPlayer.score,
-          updatedCharacters
+          updatedUserCharacters
         );
         
         toast.error("You lost this round!");
       }
     } else {
-      // Tie
+      // It's a tie - no characters are eliminated
       toast.info("It's a tie!");
     }
     
