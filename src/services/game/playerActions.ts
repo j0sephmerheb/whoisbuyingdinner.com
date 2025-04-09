@@ -35,8 +35,10 @@ export const checkAvatarSelection = async (gameId: string): Promise<boolean> => 
 
 // Roll dice
 export const rollDice = async (playerId: string): Promise<number> => {
+  // Generate a random dice value between 1 and 6
   const diceValue = Math.floor(Math.random() * 6) + 1;
   
+  // Update the player's dice value in the database
   const { error } = await supabase
     .from('players')
     .update({ dice_value: diceValue })

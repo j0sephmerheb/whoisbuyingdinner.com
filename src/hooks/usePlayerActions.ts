@@ -59,7 +59,7 @@ export const usePlayerActions = (
           // After showing result, process the round outcome
           setTimeout(() => {
             processRoundOutcome();
-          }, 2000);
+          }, 1000);
         }, 500);
       }
     } catch (error) {
@@ -74,17 +74,18 @@ export const usePlayerActions = (
   const processRoundOutcome = async () => {
     if (!currentPlayer || !opponent || !game) return;
     
-    const userRoll = currentPlayer.dice_value || 0;
+    // IMPORTANT: Get the latest dice values directly from the players
+    const playerRoll = currentPlayer.dice_value || 0;
     const opponentRoll = opponent.dice_value || 0;
     
-    console.log(`Processing round outcome - User roll: ${userRoll}, Opponent roll: ${opponentRoll}`);
+    console.log(`Processing round outcome - Current player roll: ${playerRoll}, Opponent roll: ${opponentRoll}`);
     
-    // Fix: Determine round winner based on dice values
-    if (userRoll > opponentRoll) {
+    // Determine the winner purely based on higher dice value, regardless of roll order
+    if (playerRoll > opponentRoll) {
       // Current player wins - opponent loses a character
       const updatedOpponentCharacters = [...opponent.character_data];
-      // Find first alive character and eliminate it
       const aliveIndex = updatedOpponentCharacters.findIndex(c => c.alive);
+      
       if (aliveIndex !== -1) {
         updatedOpponentCharacters[aliveIndex].alive = false;
         
@@ -96,18 +97,18 @@ export const usePlayerActions = (
         
         toast.success("You won this round!");
       }
-    } else if (userRoll < opponentRoll) {
+    } else if (playerRoll < opponentRoll) {
       // Opponent wins - current player loses a character
-      const updatedUserCharacters = [...currentPlayer.character_data];
-      // Find first alive character and eliminate it
-      const aliveIndex = updatedUserCharacters.findIndex(c => c.alive);
+      const updatedPlayerCharacters = [...currentPlayer.character_data];
+      const aliveIndex = updatedPlayerCharacters.findIndex(c => c.alive);
+      
       if (aliveIndex !== -1) {
-        updatedUserCharacters[aliveIndex].alive = false;
+        updatedPlayerCharacters[aliveIndex].alive = false;
         
         await gameService.updatePlayerAfterRound(
           currentPlayer.id,
           currentPlayer.score,
-          updatedUserCharacters
+          updatedPlayerCharacters
         );
         
         toast.error("You lost this round!");
@@ -128,7 +129,7 @@ export const usePlayerActions = (
     const opponentAliveCount = opponent.character_data.filter(c => c.alive).length;
     
     if (playerAliveCount === 0 || opponentAliveCount === 0) {
-      // Correctly determine the winner and loser
+      // Determine the winner based on characters still alive
       const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
       const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
       
