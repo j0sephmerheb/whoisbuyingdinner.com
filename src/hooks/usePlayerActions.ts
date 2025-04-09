@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/game';
 import { GameData, PlayerData, CharacterType, GamePhase } from '@/services/game';
 
