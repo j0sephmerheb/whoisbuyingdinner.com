@@ -32,19 +32,12 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     fireman: '👨‍🚒',
     santa: '🎅'
   };
-  
-  const avatarNames: Record<CharacterType, string> = {
-    cowboy: 'Cowboy',
-    ninja: 'Ninja',
-    fireman: 'Fireman',
-    santa: 'Santa'
-  };
-  
+
   return (
     <div className="flex flex-col items-center gap-8 p-8">
       <h1 className="text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-2xl">
+      <div className="grid grid-cols-4 md:grid-cols-4 gap-6 w-full max-w-2xl">
         {avatarOptions.map(avatar => (
           <Card
             key={avatar}
@@ -56,10 +49,9 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             onClick={() => onSelect(avatar)}
           >
             <div className="flex flex-col items-center gap-4">
-              <div className="h-24 w-24 flex items-center justify-center bg-white rounded-full shadow-inner text-4xl">
+              <div className="h-24 w-24 flex items-center justify-center bg-white rounded-full text-4xl">
                 <span className="text-5xl">{avatarEmoji[avatar]}</span>
               </div>
-              <h2 className="text-xl font-bold">{avatarNames[avatar]}</h2>
             </div>
           </Card>
         ))}
@@ -83,7 +75,6 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {selectedAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{avatarEmoji[selectedAvatar]}</span>
-                <span>{avatarNames[selectedAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
@@ -95,7 +86,6 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {opponentAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-3xl">{avatarEmoji[opponentAvatar]}</span>
-                <span>{avatarNames[opponentAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Waiting for opponent...</span>
