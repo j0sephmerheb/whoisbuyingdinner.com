@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
@@ -143,7 +142,6 @@ const Game = () => {
       {game_phase === 'over' && (
         <GameOver 
           loserName={getLoserName()}
-          onPlayAgain={handlePlayAgain}
         />
       )}
     </GameLayout>

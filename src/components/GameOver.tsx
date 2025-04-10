@@ -1,19 +1,17 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 interface GameOverProps {
   loserName: string;
-  onPlayAgain: () => void;
 }
 
 /**
  * Component displayed when the game is over
  * @param loserName - The name of the player who lost
- * @param onPlayAgain - Callback function to start a new game
  */
-const GameOver: React.FC<GameOverProps> = ({ loserName, onPlayAgain }) => {
+const GameOver: React.FC<GameOverProps> = ({ loserName }) => {
   const navigate = useNavigate();
   
   // Log when GameOver is rendered to help with debugging
@@ -22,13 +20,16 @@ const GameOver: React.FC<GameOverProps> = ({ loserName, onPlayAgain }) => {
   }, [loserName]);
   
   /**
-   * Handler for the "Home" button click
-   * Navigates to the home page and clears any stored state
+   * Handler for returning to home
+   * Clears all stored state and navigates to home
    */
-  const handleGoHome = () => {
-    // Clear any stored state and navigate to home
+  const handleReturn = () => {
+    // Clear any stored state
     sessionStorage.clear();
     localStorage.clear();
+    // Show success message
+    toast.success("Starting fresh!");
+    // Navigate to home
     navigate('/', { replace: true });
   };
   
@@ -43,18 +44,10 @@ const GameOver: React.FC<GameOverProps> = ({ loserName, onPlayAgain }) => {
         
         <div className="space-y-4">
           <Button 
-            onClick={onPlayAgain}
+            onClick={handleReturn}
             className="bg-gameAccent hover:bg-gameAccent/80 w-full py-6 text-xl h-auto"
           >
-            New Game
-          </Button>
-          
-          <Button 
-            onClick={handleGoHome}
-            variant="outline" 
-            className="w-full py-6 text-xl h-auto border-gameAccent text-gameAccent hover:bg-gameAccent/10"
-          >
-            Back to Home
+            Return to Home
           </Button>
         </div>
       </div>
