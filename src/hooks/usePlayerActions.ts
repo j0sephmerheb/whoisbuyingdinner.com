@@ -11,6 +11,13 @@ type CharacterData = {
   alive: boolean;
 };
 
+/**
+ * Hook that provides player action functionality in the game
+ * @param game - The current game data
+ * @param currentPlayer - The current player data
+ * @param opponent - The opponent player data
+ * @returns Functions for player actions and state
+ */
 export const usePlayerActions = (
   game: GameData | null,
   currentPlayer: PlayerData | null,
@@ -18,7 +25,11 @@ export const usePlayerActions = (
 ) => {
   const [isRolling, setIsRolling] = useState(false);
   
-  // Select avatar
+  /**
+   * Selects an avatar for the current player
+   * @param avatarType - The type of avatar to select
+   * @returns Boolean indicating success or failure
+   */
   const selectAvatar = async (avatarType: CharacterType) => {
     if (!currentPlayer) return false;
     
@@ -31,7 +42,10 @@ export const usePlayerActions = (
     return result;
   };
 
-  // Roll dice - now only rolls for the current player
+  /**
+   * Handles the dice rolling action for the current player
+   * Processes the round outcome when both players have rolled
+   */
   const rollDice = async () => {
     if (!currentPlayer || !game) return;
     
@@ -54,7 +68,9 @@ export const usePlayerActions = (
       // Roll dice for current player
       const value = await gameService.rollDice(currentPlayer.id);
       
-      // Function to check opponent's roll and process result
+      /**
+       * Checks if the opponent has rolled and processes the round result
+       */
       const checkOpponentAndProcessResult = async () => {
         try {
           // Only proceed if the opponent is not null
@@ -136,7 +152,11 @@ export const usePlayerActions = (
     }
   };
 
-  // Process the outcome of a round - Modified to accept stored dice values
+  /**
+   * Processes the outcome of a round based on dice rolls
+   * Updates player scores, character data, and checks for game over condition
+   * @param roundData - Optional data containing dice roll values
+   */
   const processRoundOutcome = async (roundData?: { 
     currentPlayerRoll: number;
     opponentRoll: number;
@@ -254,7 +274,7 @@ export const usePlayerActions = (
         
         console.log(`Game over! Winner: ${winnerId}, Loser: ${loserId}`);
         
-        // Use the enhanced endGame function that sets winner/loser first then changes phase
+        // Set winner/loser first then changes phase to over
         const success = await gameService.endGame(game.id, winnerId, loserId);
         
         if (success) {

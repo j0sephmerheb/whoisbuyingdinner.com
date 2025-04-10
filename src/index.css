@@ -100,11 +100,11 @@
   }
   
   .bg-gameAccent {
-    background-color: #FF6B6B;
+    background-color: #0EA5E9; /* Updated to new blue color */
   }
   
   .text-gameAccent {
-    color: #FF6B6B;
+    color: #0EA5E9; /* Updated to new blue color */
   }
   
   .animate-float {

@@ -1,8 +1,20 @@
+
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/game';
 import { GameData, PlayerData } from '@/services/game';
 
+/**
+ * Hook for managing real-time game subscriptions
+ * @param gameId - The ID of the current game
+ * @param playerId - The ID of the current player
+ * @param setGame - Function to update game state
+ * @param setPlayers - Function to update players state
+ * @param setCurrentPlayer - Function to update current player state
+ * @param setOpponent - Function to update opponent state
+ * @param setCountdownValue - Function to update countdown value state
+ * @param setIsCountingDown - Function to update countdown state
+ */
 export const useGameSubscriptions = (
   gameId: string | undefined,
   playerId: string | undefined,
@@ -13,23 +25,9 @@ export const useGameSubscriptions = (
   setCountdownValue: React.Dispatch<React.SetStateAction<number>>,
   setIsCountingDown: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  // Use refs to avoid creating new interval functions on each render
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const countdownStartedRef = useRef<boolean>(false);
-  const gamePhaseRef = useRef<string | null>(null);
+  // Store references to the current game ID and phase
   const gameIdRef = useRef<string | null>(null);
-
-  // Clean up any existing interval when component unmounts
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-      // Reset countdown flag on unmount
-      countdownStartedRef.current = false;
-    };
-  }, []);
+  const gamePhaseRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!gameId) return;
@@ -39,7 +37,7 @@ export const useGameSubscriptions = (
     
     console.log("Setting up game subscriptions for game:", gameId);
     
-    // Set up real-time listeners
+    // Set up real-time listeners for game updates
     const gameChannel = gameService.subscribeToGame(gameId, (payload) => {
       console.log("Game update received:", payload);
       if (payload.new) {
@@ -47,49 +45,13 @@ export const useGameSubscriptions = (
         if (gameIdRef.current === gameId) {
           setGame(payload.new);
           
-          // Store the current game phase to compare later
-          const oldPhase = gamePhaseRef.current;
-          const newPhase = payload.new.game_phase;
-          gamePhaseRef.current = newPhase;
-          
-          // Handle game phase changes - Only trigger countdown if phase just changed to 'playing'
-          // and we haven't already started a countdown
-          if (newPhase === 'playing' && 
-              (oldPhase === 'waiting' || oldPhase === 'selection') && 
-              !countdownStartedRef.current) {
-            
-            // Set the flag to prevent multiple countdowns
-            countdownStartedRef.current = true;
-            console.log("Starting countdown via subscription");
-            
-            // Clear any existing interval first
-            if (intervalRef.current) {
-              clearInterval(intervalRef.current);
-              intervalRef.current = null;
-            }
-            
-            let count = 5;
-            setCountdownValue(count);
-            setIsCountingDown(true);
-            
-            intervalRef.current = setInterval(() => {
-              count--;
-              setCountdownValue(count);
-              
-              if (count <= 0) {
-                if (intervalRef.current) {
-                  clearInterval(intervalRef.current);
-                  intervalRef.current = null;
-                }
-                setIsCountingDown(false);
-                countdownStartedRef.current = false;
-              }
-            }, 1000);
-          }
+          // Store the current game phase
+          gamePhaseRef.current = payload.new.game_phase;
         }
       }
     });
     
+    // Set up real-time listeners for player updates
     const playersChannel = gameService.subscribeToPlayers(gameId, (payload) => {
       console.log("Player update received:", payload);
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
@@ -151,15 +113,8 @@ export const useGameSubscriptions = (
     });
     
     return () => {
-      // Reset countdown flag on cleanup
-      countdownStartedRef.current = false;
+      // Reset game phase reference on cleanup
       gamePhaseRef.current = null;
-      
-      // Clear interval on cleanup
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
       
       // Unsubscribe from channels
       gameChannel.unsubscribe();

@@ -63,12 +63,12 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom game colors
+				// Updated game colors with more appealing colors
 				chicken: '#F2FCE2',
 				cowboy: '#FEC6A1',
-				gameAccent: '#9b87f5',
+				gameAccent: '#0EA5E9', // Changed from pink to an attractive blue
 				gameBackground: '#f5f0e0',
-				buttonPrimary: '#9b87f5',
+				buttonPrimary: '#0EA5E9', // Updated to match gameAccent
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

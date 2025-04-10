@@ -12,6 +12,10 @@ import GameOver from '@/components/GameOver';
 import GameCountdown from '@/components/GameCountdown';
 import { toast } from 'sonner';
 
+/**
+ * Main Game page component
+ * Handles different game phases and renders appropriate components
+ */
 const Game = () => {
   const { gameId, playerId } = useParams<{ gameId: string, playerId: string }>();
   const navigate = useNavigate();
@@ -66,7 +70,10 @@ const Game = () => {
   const bothPlayersJoined = players.length === 2;
   const bothPlayersSelectedAvatar = players.every(p => p.character_type !== null);
   
-  // Get the loser's name - handle null cases gracefully
+  /**
+   * Gets the name of the player who lost the game
+   * @returns The name of the losing player or a default
+   */
   const getLoserName = () => {
     if (!game.loser_id) return "Unknown";
     
@@ -89,6 +96,10 @@ const Game = () => {
     return "Someone";
   };
   
+  /**
+   * Handler for the "Play Again" button in the GameOver component
+   * Navigates to the home page to start a new game
+   */
   const handlePlayAgain = () => {
     toast.success("Starting a new game!");
     navigate('/');
