@@ -32,7 +32,7 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
   }, [winner, userTeam, winnerName, loserName]);
   
   return (
-    <div className="flex items-center justify-center min-h-full w-full">
+    <div className="flex items-center justify-center min-h-[70vh] w-full">
       <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl text-center">
         <h2 className="text-3xl font-bold mb-2">
           {userWon ? '🎉 Victory! 🎉' : isTie ? '🤝 Draw! 🤝' : '😞 Defeat! 😞'}

@@ -65,6 +65,18 @@ const Game = () => {
     navigate('/');
   };
   
+  // Explicitly log when we're showing the GameOver component
+  useEffect(() => {
+    if (game_phase === 'over') {
+      console.log('Showing GameOver component', {
+        winnerId: game.winner_id,
+        loserId: game.loser_id,
+        currentPlayerId: currentPlayer.id,
+        opponentId: opponent?.id
+      });
+    }
+  }, [game_phase, game.winner_id, game.loser_id, currentPlayer.id, opponent?.id]);
+  
   return (
     <GameLayout gamePhase={game_phase}>
       {game_phase === 'waiting' && (

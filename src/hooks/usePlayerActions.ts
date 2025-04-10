@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -49,29 +50,46 @@ export const usePlayerActions = (
       
       // Function to check opponent's roll and process result
       const checkOpponentAndProcessResult = async () => {
-        // Get fresh opponent data
-        const { data: freshOpponent } = await supabase
-          .from('players')
-          .select('*')
-          .eq('id', opponent?.id)
-          .single();
+        try {
+          // Only proceed if the opponent is not null
+          if (!opponent) {
+            console.log("Opponent is null, cannot process round result");
+            setIsRolling(false);
+            return;
+          }
           
-        if (freshOpponent?.dice_value !== null) {
-          // Store the dice values for processing
-          const roundData = {
-            currentPlayerRoll: value,
-            opponentRoll: freshOpponent.dice_value,
-            currentPlayerId: currentPlayer.id,
-            opponentId: freshOpponent.id
-          };
-          
-          // Update game phase to result
-          await gameService.updateGamePhase(game.id, 'result');
-          
-          // Process round outcome after a delay, passing the stored dice values
-          setTimeout(() => {
-            processRoundOutcome(roundData);
-          }, 2000);
+          // Get fresh opponent data
+          const { data: freshOpponent } = await supabase
+            .from('players')
+            .select('*')
+            .eq('id', opponent.id)
+            .single();
+            
+          if (freshOpponent?.dice_value !== null) {
+            // Store the dice values for processing
+            const roundData = {
+              currentPlayerRoll: value,
+              opponentRoll: freshOpponent.dice_value,
+              currentPlayerId: currentPlayer.id,
+              opponentId: freshOpponent.id
+            };
+            
+            console.log("Processing round with data:", roundData);
+            
+            // Update game phase to result
+            await gameService.updateGamePhase(game.id, 'result');
+            
+            // Process round outcome after a delay, passing the stored dice values
+            setTimeout(() => {
+              processRoundOutcome(roundData);
+            }, 2000);
+          } else {
+            console.log("Opponent hasn't rolled yet");
+            setIsRolling(false);
+          }
+        } catch (error) {
+          console.error("Error in checkOpponentAndProcessResult:", error);
+          setIsRolling(false);
         }
       };
       
@@ -106,8 +124,8 @@ export const usePlayerActions = (
         }, 5000);
       }
     } catch (error) {
+      console.error("Error in rollDice:", error);
       toast.error('Failed to roll dice. Try again.');
-    } finally {
       setIsRolling(false);
     }
   };
@@ -119,7 +137,10 @@ export const usePlayerActions = (
     currentPlayerId: string;
     opponentId: string;
   }) => {
-    if (!game || !currentPlayer || !opponent) return;
+    if (!game || !currentPlayer || !opponent) {
+      console.error("Missing required data for processRoundOutcome", { game, currentPlayer, opponent });
+      return;
+    }
     
     // Use stored dice values if provided, otherwise use current values
     const currentPlayerRoll = roundData?.currentPlayerRoll ?? currentPlayer.dice_value;
@@ -129,6 +150,8 @@ export const usePlayerActions = (
       toast.error("Error: One of the players hasn't rolled yet");
       return;
     }
+    
+    console.log(`Processing round outcome: Player rolled ${currentPlayerRoll}, Opponent rolled ${opponentRoll}`);
     
     // Determine winner of this round
     let winningPlayerId: string | null = null;
@@ -189,16 +212,30 @@ export const usePlayerActions = (
     const playerAliveCount = currentPlayer.character_data.filter(c => c.alive).length;
     const opponentAliveCount = opponent.character_data.filter(c => c.alive).length;
     
+    console.log(`Player alive characters: ${playerAliveCount}, Opponent alive characters: ${opponentAliveCount}`);
+    
     if (playerAliveCount === 0 || opponentAliveCount === 0) {
       // Determine the winner based on characters still alive
       const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
       const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
       
+      console.log(`Game over! Winner: ${winnerId}, Loser: ${loserId}`);
+      
       try {
         // End the game with winner and loser - this will also update the game phase to 'over'
-        await gameService.endGame(game.id, winnerId, loserId);
+        const success = await gameService.endGame(game.id, winnerId, loserId);
+        if (success) {
+          toast.success(`Game over! ${winnerId === currentPlayer.id ? 'You won!' : 'You lost!'}`);
+        } else {
+          console.error("Failed to end game properly");
+          // Manual fallback to set game phase
+          await gameService.updateGamePhase(game.id, 'over');
+        }
       } catch (error) {
+        console.error("Error ending game:", error);
         toast.error("Error ending game");
+        // Manual fallback to set game phase
+        await gameService.updateGamePhase(game.id, 'over');
       }
     } else {
       // Increment round counter and move to next round
@@ -217,8 +254,13 @@ export const usePlayerActions = (
         if (error) {
           throw error;
         }
+        
+        console.log(`Moving to round ${nextRound}`);
       } catch (error) {
+        console.error("Error moving to next round:", error);
         toast.error("Error moving to next round");
+      } finally {
+        setIsRolling(false);
       }
     }
   };

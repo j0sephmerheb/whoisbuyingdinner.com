@@ -18,17 +18,9 @@ const GameLayout: React.FC<GameLayoutProps> = ({ children, gamePhase }) => {
         <h1 className="text-3xl font-bold text-gameAccent text-center w-full">Who's Buying Dinner?</h1>
       </header>
       
-      {gamePhase !== 'over' && (
-        <main className="w-full max-w-5xl bg-white/90 rounded-2xl shadow-xl p-6 flex-1">
-          {children}
-        </main>
-      )}
-      
-      {gamePhase === 'over' && (
-        <main className="w-full max-w-5xl flex-1">
-          {children}
-        </main>
-      )}
+      <main className={`w-full max-w-5xl ${gamePhase !== 'over' ? 'bg-white/90 rounded-2xl shadow-xl p-6' : ''} flex-1`}>
+        {children}
+      </main>
       
       <footer className="w-full max-w-5xl mt-6 text-center text-sm text-gray-600">
         Who's Buying Dinner? © 2025 - Roll the dice, loser pays the price!
