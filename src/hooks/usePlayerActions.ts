@@ -170,10 +170,15 @@ export const usePlayerActions = (
       const losingPlayer = losingPlayerId === currentPlayer.id ? currentPlayer : opponent;
       const winningPlayer = winningPlayerId === currentPlayer.id ? currentPlayer : opponent;
       
-      const updatedCharacters = [...losingPlayer.character_data];
-      const aliveIndex = updatedCharacters.findIndex(c => c.alive);
+      // Create a deep copy of the loser's character data to avoid mutations
+      const updatedCharacters = JSON.parse(JSON.stringify(losingPlayer.character_data));
+      
+      // Find the FIRST alive character and mark it as defeated
+      // This fixes the bug where multiple characters were being marked as defeated
+      const aliveIndex = updatedCharacters.findIndex((c: { alive: boolean }) => c.alive);
       
       if (aliveIndex !== -1) {
+        // Only update one character at a time
         updatedCharacters[aliveIndex].alive = false;
         
         try {
