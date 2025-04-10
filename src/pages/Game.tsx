@@ -16,6 +16,10 @@ const Game = () => {
   const { gameId, playerId } = useParams<{ gameId: string, playerId: string }>();
   const navigate = useNavigate();
   
+  // Ensuring these are valid to avoid conditional hook issues
+  const safeGameId = gameId || '';
+  const safePlayerId = playerId || '';
+  
   const { 
     loading, 
     error,
@@ -28,21 +32,37 @@ const Game = () => {
     rollDice,
     countdownValue,
     isCountingDown
-  } = useMultiplayerGame(gameId, playerId);
+  } = useMultiplayerGame(safeGameId, safePlayerId);
   
-  // Log game state changes to help with debugging
+  // Log game state changes to help with debugging - This hook MUST always run
   useEffect(() => {
-    console.log('Game component update:', { 
-      gameId, 
-      playerId,
-      gamePhase: game?.game_phase,
-      winnerId: game?.winner_id,
-      loserId: game?.loser_id,
-      currentPlayerId: currentPlayer?.id
-    });
-  }, [gameId, playerId, game, currentPlayer]);
+    if (game) {
+      console.log('Game component update:', { 
+        gameId: safeGameId, 
+        playerId: safePlayerId,
+        gamePhase: game.game_phase,
+        winnerId: game.winner_id,
+        loserId: game.loser_id,
+        currentPlayerId: currentPlayer?.id
+      });
+    }
+  }, [safeGameId, safePlayerId, game, currentPlayer]);
   
-  if (!gameId || !playerId) {
+  // This useEffect was conditionally running, causing the hook order error
+  // Now it always runs, but conditionally logs data
+  useEffect(() => {
+    if (game && game.game_phase === 'over') {
+      console.log('Showing GameOver component', {
+        winnerId: game.winner_id,
+        loserId: game.loser_id,
+        currentPlayerId: currentPlayer?.id,
+        opponentId: opponent?.id
+      });
+    }
+  }, [game, currentPlayer?.id, opponent?.id]);
+  
+  // Early returns - these don't affect hook order since they happen after all hooks
+  if (!safeGameId || !safePlayerId) {
     navigate('/');
     return null;
   }
@@ -64,18 +84,6 @@ const Game = () => {
     toast.success("Starting a new game!");
     navigate('/');
   };
-  
-  // Explicitly log when we're showing the GameOver component
-  useEffect(() => {
-    if (game_phase === 'over') {
-      console.log('Showing GameOver component', {
-        winnerId: game.winner_id,
-        loserId: game.loser_id,
-        currentPlayerId: currentPlayer.id,
-        opponentId: opponent?.id
-      });
-    }
-  }, [game_phase, game.winner_id, game.loser_id, currentPlayer.id, opponent?.id]);
   
   return (
     <GameLayout gamePhase={game_phase}>
