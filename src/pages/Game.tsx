@@ -34,7 +34,7 @@ const Game = () => {
     isCountingDown
   } = useMultiplayerGame(safeGameId, safePlayerId);
   
-  // Log game state changes to help with debugging - This hook MUST always run
+  // Log game state for debugging
   useEffect(() => {
     if (game) {
       console.log('Game component update:', { 
@@ -42,24 +42,10 @@ const Game = () => {
         playerId: safePlayerId,
         gamePhase: game.game_phase,
         winnerId: game.winner_id,
-        loserId: game.loser_id,
-        currentPlayerId: currentPlayer?.id
+        loserId: game.loser_id
       });
     }
-  }, [safeGameId, safePlayerId, game, currentPlayer]);
-  
-  // This useEffect was conditionally running, causing the hook order error
-  // Now it always runs, but conditionally logs data
-  useEffect(() => {
-    if (game && game.game_phase === 'over') {
-      console.log('Showing GameOver component', {
-        winnerId: game.winner_id,
-        loserId: game.loser_id,
-        currentPlayerId: currentPlayer?.id,
-        opponentId: opponent?.id
-      });
-    }
-  }, [game, currentPlayer?.id, opponent?.id]);
+  }, [game, safeGameId, safePlayerId]);
   
   // Early returns - these don't affect hook order since they happen after all hooks
   if (!safeGameId || !safePlayerId) {
@@ -79,6 +65,11 @@ const Game = () => {
   const { game_phase } = game;
   const bothPlayersJoined = players.length === 2;
   const bothPlayersSelectedAvatar = players.every(p => p.character_type !== null);
+  
+  // Simplify handling of loser's name
+  const loserName = game.loser_id ? 
+    (game.loser_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')) : 
+    'Unknown';
   
   const handlePlayAgain = () => {
     toast.success("Starting a new game!");
@@ -122,10 +113,7 @@ const Game = () => {
       
       {game_phase === 'over' && (
         <GameOver 
-          winner={game.winner_id === currentPlayer.id ? currentPlayer.character_type : opponent?.character_type} 
-          userTeam={currentPlayer.character_type}
-          winnerName={game.winner_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
-          loserName={game.loser_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
+          loserName={loserName}
           onPlayAgain={handlePlayAgain}
         />
       )}

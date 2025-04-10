@@ -18,7 +18,7 @@ const GameLayout: React.FC<GameLayoutProps> = ({ children, gamePhase }) => {
         <h1 className="text-3xl font-bold text-gameAccent text-center w-full">Who's Buying Dinner?</h1>
       </header>
       
-      <main className={`w-full max-w-5xl ${gamePhase !== 'over' ? 'bg-white/90 rounded-2xl shadow-xl p-6' : ''} flex-1`}>
+      <main className="w-full max-w-5xl bg-white/90 rounded-2xl shadow-xl p-6 flex-1">
         {children}
       </main>
       

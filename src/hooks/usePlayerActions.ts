@@ -63,7 +63,7 @@ export const usePlayerActions = (
             .from('players')
             .select('*')
             .eq('id', opponent.id)
-            .single();
+            .maybeSingle();
             
           if (freshOpponent?.dice_value !== null) {
             // Store the dice values for processing
@@ -227,20 +227,22 @@ export const usePlayerActions = (
       console.log(`Game over! Winner: ${winnerId}, Loser: ${loserId}`);
       
       try {
-        // End the game with winner and loser - this will also update the game phase to 'over'
+        // Set game phase to 'over' first to ensure it renders properly
+        await gameService.updateGamePhase(game.id, 'over');
+        
+        // End the game with winner and loser
         const success = await gameService.endGame(game.id, winnerId, loserId);
+        
         if (success) {
           toast.success(`Game over! ${winnerId === currentPlayer.id ? 'You won!' : 'You lost!'}`);
         } else {
           console.error("Failed to end game properly");
-          // Manual fallback to set game phase
-          await gameService.updateGamePhase(game.id, 'over');
         }
       } catch (error) {
         console.error("Error ending game:", error);
         toast.error("Error ending game");
-        // Manual fallback to set game phase
-        await gameService.updateGamePhase(game.id, 'over');
+      } finally {
+        setIsRolling(false);
       }
     } else {
       // Increment round counter and move to next round

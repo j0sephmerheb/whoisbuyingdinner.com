@@ -61,17 +61,28 @@ export const endGame = async (gameId: string, winnerId: string, loserId: string)
   console.log(`[GAME STATE] Ending game: ${gameId}, Winner: ${winnerId}, Loser: ${loserId}`);
   
   try {
+    // First set the game phase to 'over' without setting winners to ensure this takes effect
+    const { error: phaseError } = await supabase
+      .from('games')
+      .update({ game_phase: 'over' })
+      .eq('id', gameId);
+      
+    if (phaseError) {
+      console.error("[GAME STATE] Error setting game phase to over:", phaseError);
+      return false;
+    }
+    
+    // Then set the winner and loser
     const { error } = await supabase
       .from('games')
       .update({ 
-        game_phase: 'over',
         winner_id: winnerId,
         loser_id: loserId
       })
       .eq('id', gameId);
 
     if (error) {
-      console.error("[GAME STATE] Error ending game:", error);
+      console.error("[GAME STATE] Error setting winner and loser:", error);
       return false;
     }
     
