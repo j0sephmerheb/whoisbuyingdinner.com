@@ -174,7 +174,6 @@ export const usePlayerActions = (
       const updatedCharacters = JSON.parse(JSON.stringify(losingPlayer.character_data));
       
       // Find the FIRST alive character and mark it as defeated
-      // This fixes the bug where multiple characters were being marked as defeated
       const aliveIndex = updatedCharacters.findIndex((c: { alive: boolean }) => c.alive);
       
       if (aliveIndex !== -1) {
@@ -213,24 +212,48 @@ export const usePlayerActions = (
       return;
     }
     
-    // Check if game is over
-    const playerAliveCount = currentPlayer.character_data.filter(c => c.alive).length;
-    const opponentAliveCount = opponent.character_data.filter(c => c.alive).length;
-    
-    console.log(`Player alive characters: ${playerAliveCount}, Opponent alive characters: ${opponentAliveCount}`);
-    
-    if (playerAliveCount === 0 || opponentAliveCount === 0) {
-      // Determine the winner based on characters still alive
-      const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
-      const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
-      
-      console.log(`Game over! Winner: ${winnerId}, Loser: ${loserId}`);
-      
-      try {
-        // Set game phase to 'over' first to ensure it renders properly
-        await gameService.updateGamePhase(game.id, 'over');
+    // Check if game is over after updating characters - get fresh data from the database
+    try {
+      const { data: freshCurrentPlayer } = await supabase
+        .from('players')
+        .select('*')
+        .eq('id', currentPlayer.id)
+        .maybeSingle();
         
-        // End the game with winner and loser
+      const { data: freshOpponent } = await supabase
+        .from('players')
+        .select('*')
+        .eq('id', opponent.id)
+        .maybeSingle();
+        
+      if (!freshCurrentPlayer || !freshOpponent) {
+        console.error("Could not get fresh player data");
+        setIsRolling(false);
+        return;
+      }
+      
+      // Make sure character_data is properly typed
+      const currentPlayerCharacters = Array.isArray(freshCurrentPlayer.character_data) 
+        ? freshCurrentPlayer.character_data 
+        : [];
+        
+      const opponentCharacters = Array.isArray(freshOpponent.character_data)
+        ? freshOpponent.character_data
+        : [];
+      
+      const playerAliveCount = currentPlayerCharacters.filter(c => c.alive).length;
+      const opponentAliveCount = opponentCharacters.filter(c => c.alive).length;
+      
+      console.log(`Player alive characters: ${playerAliveCount}, Opponent alive characters: ${opponentAliveCount}`);
+      
+      if (playerAliveCount === 0 || opponentAliveCount === 0) {
+        // Determine the winner and loser based on who has remaining characters
+        const winnerId = playerAliveCount > 0 ? currentPlayer.id : opponent.id;
+        const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
+        
+        console.log(`Game over! Winner: ${winnerId}, Loser: ${loserId}`);
+        
+        // Use the enhanced endGame function that sets winner/loser first then changes phase
         const success = await gameService.endGame(game.id, winnerId, loserId);
         
         if (success) {
@@ -238,17 +261,10 @@ export const usePlayerActions = (
         } else {
           console.error("Failed to end game properly");
         }
-      } catch (error) {
-        console.error("Error ending game:", error);
-        toast.error("Error ending game");
-      } finally {
-        setIsRolling(false);
-      }
-    } else {
-      // Increment round counter and move to next round
-      const nextRound = game.current_round + 1;
-      
-      try {
+      } else {
+        // Increment round counter and move to next round
+        const nextRound = game.current_round + 1;
+        
         // Update round number and game phase in a single transaction
         const { error } = await supabase
           .from('games')
@@ -263,12 +279,12 @@ export const usePlayerActions = (
         }
         
         console.log(`Moving to round ${nextRound}`);
-      } catch (error) {
-        console.error("Error moving to next round:", error);
-        toast.error("Error moving to next round");
-      } finally {
-        setIsRolling(false);
       }
+    } catch (error) {
+      console.error("Error processing round result:", error);
+      toast.error("Error processing round result");
+    } finally {
+      setIsRolling(false);
     }
   };
 
