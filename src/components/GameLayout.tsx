@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface GameLayoutProps {
@@ -6,6 +7,11 @@ interface GameLayoutProps {
 }
 
 const GameLayout: React.FC<GameLayoutProps> = ({ children, gamePhase }) => {
+  // Log the current game phase to help with debugging
+  React.useEffect(() => {
+    console.log('GameLayout rendered with phase:', gamePhase);
+  }, [gamePhase]);
+  
   return (
     <div className="min-h-screen flex flex-col items-center bg-gameBackground p-4">
       <header className="w-full max-w-5xl flex items-center justify-between mb-6">

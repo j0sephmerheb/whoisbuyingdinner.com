@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { CharacterType } from '@/services/game';
+import { toast } from 'sonner';
 
 interface GameOverProps {
   winner: CharacterType | undefined;
@@ -23,6 +25,11 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
     fireman: '👨‍🚒',
     santa: '🎅'
   };
+  
+  // Log when GameOver is rendered to help with debugging
+  React.useEffect(() => {
+    console.log('GameOver component rendered', { winner, userTeam, winnerName, loserName });
+  }, [winner, userTeam, winnerName, loserName]);
   
   return (
     <div className="flex items-center justify-center min-h-full w-full">
@@ -46,7 +53,10 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
         
         <div className="flex flex-col gap-3">
           <Button 
-            onClick={onPlayAgain} 
+            onClick={() => {
+              toast.success("Starting a new game!");
+              onPlayAgain();
+            }}
             className="bg-gameAccent hover:bg-gameAccent/80 w-full py-6 text-xl h-auto"
           >
             New Game

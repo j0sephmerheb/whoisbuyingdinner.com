@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
 import GameLayout from '@/components/GameLayout';
@@ -9,6 +10,7 @@ import TeamSelection from '@/components/TeamSelection';
 import PlayArea from '@/components/PlayArea';
 import GameOver from '@/components/GameOver';
 import GameCountdown from '@/components/GameCountdown';
+import { toast } from 'sonner';
 
 const Game = () => {
   const { gameId, playerId } = useParams<{ gameId: string, playerId: string }>();
@@ -28,6 +30,18 @@ const Game = () => {
     isCountingDown
   } = useMultiplayerGame(gameId, playerId);
   
+  // Log game state changes to help with debugging
+  useEffect(() => {
+    console.log('Game component update:', { 
+      gameId, 
+      playerId,
+      gamePhase: game?.game_phase,
+      winnerId: game?.winner_id,
+      loserId: game?.loser_id,
+      currentPlayerId: currentPlayer?.id
+    });
+  }, [gameId, playerId, game, currentPlayer]);
+  
   if (!gameId || !playerId) {
     navigate('/');
     return null;
@@ -45,6 +59,11 @@ const Game = () => {
   const { game_phase } = game;
   const bothPlayersJoined = players.length === 2;
   const bothPlayersSelectedAvatar = players.every(p => p.character_type !== null);
+  
+  const handlePlayAgain = () => {
+    toast.success("Starting a new game!");
+    navigate('/');
+  };
   
   return (
     <GameLayout gamePhase={game_phase}>
@@ -87,7 +106,7 @@ const Game = () => {
           userTeam={currentPlayer.character_type}
           winnerName={game.winner_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
           loserName={game.loser_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')}
-          onPlayAgain={() => navigate('/')}
+          onPlayAgain={handlePlayAgain}
         />
       )}
     </GameLayout>
