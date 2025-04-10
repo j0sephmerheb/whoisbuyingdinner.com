@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMultiplayerGame } from '@/hooks/useMultiplayerGame';
 import GameLayout from '@/components/GameLayout';
@@ -29,20 +28,10 @@ const Game = () => {
     isCountingDown
   } = useMultiplayerGame(gameId, playerId);
   
-  useEffect(() => {
-    if (!gameId || !playerId) {
-      navigate('/');
-      return;
-    }
-    
-    if (game && game.game_phase === 'over') {
-      const redirectTimer = setTimeout(() => {
-        navigate('/');
-      }, 10000);
-      
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [gameId, playerId, navigate, game]);
+  if (!gameId || !playerId) {
+    navigate('/');
+    return null;
+  }
   
   if (loading) {
     return <LoadingState />;
@@ -58,7 +47,7 @@ const Game = () => {
   const bothPlayersSelectedAvatar = players.every(p => p.character_type !== null);
   
   return (
-    <GameLayout>
+    <GameLayout gamePhase={game_phase}>
       {game_phase === 'waiting' && (
         <WaitingLobby 
           gameId={game.id} 

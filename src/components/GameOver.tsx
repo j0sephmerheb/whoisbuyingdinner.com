@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +25,7 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
   };
   
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="flex items-center justify-center min-h-full w-full">
       <div className="bg-white rounded-xl p-8 max-w-md w-full shadow-2xl text-center">
         <h2 className="text-3xl font-bold mb-2">
           {userWon ? '🎉 Victory! 🎉' : isTie ? '🤝 Draw! 🤝' : '😞 Defeat! 😞'}
@@ -38,14 +37,11 @@ const GameOver: React.FC<GameOverProps> = ({ winner, userTeam, winnerName, loser
         
         <div className="text-xl mb-6">
           {winner && (
-            <>
-              <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
-              <p className="text-2xl my-4">{loserName} is buying dinner tonight!</p>
-            </>
+            <p className="font-bold text-gameAccent">Congratulations {winnerName}!</p>
           )}
-          {!winner && (
-            <p className="text-2xl my-4">It's a tie! Split the bill!</p>
-          )}
+          <p className="text-2xl my-4">
+            {isTie ? "It's a tie! Split the bill!" : `${loserName} is buying dinner tonight!`}
+          </p>
         </div>
         
         <div className="flex flex-col gap-3">

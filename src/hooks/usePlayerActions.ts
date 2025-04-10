@@ -114,44 +114,32 @@ export const usePlayerActions = (
 
   // Process the outcome of a round - Modified to accept stored dice values
   const processRoundOutcome = async (roundData?: { 
-    currentPlayerRoll: number; 
+    currentPlayerRoll: number;
     opponentRoll: number;
     currentPlayerId: string;
     opponentId: string;
   }) => {
-    if (!currentPlayer || !opponent || !game) {
-      toast.error("Error processing round outcome");
-      return;
-    }
+    if (!game || !currentPlayer || !opponent) return;
     
     // Use stored dice values if provided, otherwise use current values
-    const playerRoll = roundData?.currentPlayerRoll ?? currentPlayer.dice_value;
+    const currentPlayerRoll = roundData?.currentPlayerRoll ?? currentPlayer.dice_value;
     const opponentRoll = roundData?.opponentRoll ?? opponent.dice_value;
     
-    if (playerRoll === null || opponentRoll === null) {
-      toast.error("Cannot process outcome - missing dice value");
+    if (currentPlayerRoll === null || opponentRoll === null) {
+      toast.error("Error: One of the players hasn't rolled yet");
       return;
     }
     
-    // Determine round winner based purely on dice values
-    let losingPlayerId: string | null = null;
+    // Determine winner of this round
     let winningPlayerId: string | null = null;
+    let losingPlayerId: string | null = null;
     
-    if (playerRoll > opponentRoll) {
-      // Current player wins, opponent loses a character
-      losingPlayerId = opponent.id;
+    if (currentPlayerRoll > opponentRoll) {
       winningPlayerId = currentPlayer.id;
-      toast.success("You won this round!");
-    } 
-    else if (playerRoll < opponentRoll) {
-      // Opponent wins, current player loses a character
-      losingPlayerId = currentPlayer.id;
+      losingPlayerId = opponent.id;
+    } else if (opponentRoll > currentPlayerRoll) {
       winningPlayerId = opponent.id;
-      toast.error("You lost this round!");
-    }
-    else {
-      // It's a tie - no characters are eliminated
-      toast.info("It's a tie! No characters lost.");
+      losingPlayerId = currentPlayer.id;
     }
     
     // Update the character data for the losing player if there is one
@@ -207,6 +195,7 @@ export const usePlayerActions = (
       const loserId = playerAliveCount > 0 ? opponent.id : currentPlayer.id;
       
       try {
+        // End the game with winner and loser - this will also update the game phase to 'over'
         await gameService.endGame(game.id, winnerId, loserId);
       } catch (error) {
         toast.error("Error ending game");
