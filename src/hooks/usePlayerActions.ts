@@ -5,6 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import * as gameService from '@/services/game';
 import { GameData, PlayerData, CharacterType, GamePhase } from '@/services/game';
 
+// Define a type for the character data to fix the TypeScript errors
+type CharacterData = {
+  id: number;
+  alive: boolean;
+};
+
 export const usePlayerActions = (
   game: GameData | null,
   currentPlayer: PlayerData | null,
@@ -232,14 +238,9 @@ export const usePlayerActions = (
         return;
       }
       
-      // Make sure character_data is properly typed
-      const currentPlayerCharacters = Array.isArray(freshCurrentPlayer.character_data) 
-        ? freshCurrentPlayer.character_data 
-        : [];
-        
-      const opponentCharacters = Array.isArray(freshOpponent.character_data)
-        ? freshOpponent.character_data
-        : [];
+      // Properly type the character data for TypeScript
+      const currentPlayerCharacters = (freshCurrentPlayer.character_data as CharacterData[]) || [];
+      const opponentCharacters = (freshOpponent.character_data as CharacterData[]) || [];
       
       const playerAliveCount = currentPlayerCharacters.filter(c => c.alive).length;
       const opponentAliveCount = opponentCharacters.filter(c => c.alive).length;
