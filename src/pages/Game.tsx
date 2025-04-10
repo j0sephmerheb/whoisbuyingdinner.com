@@ -57,19 +57,37 @@ const Game = () => {
     return <LoadingState />;
   }
   
-  if (error || !game || !currentPlayer) {
+  if (error || !game) {
     return <ErrorState error={error} />;
   }
   
-  const isHost = currentPlayer.is_host;
+  const isHost = currentPlayer?.is_host || false;
   const { game_phase } = game;
   const bothPlayersJoined = players.length === 2;
   const bothPlayersSelectedAvatar = players.every(p => p.character_type !== null);
   
-  // Simplify handling of loser's name
-  const loserName = game.loser_id ? 
-    (game.loser_id === currentPlayer.id ? currentPlayer.name : (opponent?.name || 'Opponent')) : 
-    'Unknown';
+  // Get the loser's name - handle null cases gracefully
+  const getLoserName = () => {
+    if (!game.loser_id) return "Unknown";
+    
+    // Check if the loser is the current player
+    if (currentPlayer && game.loser_id === currentPlayer.id) {
+      return currentPlayer.name;
+    }
+    
+    // Check if the loser is the opponent
+    if (opponent && game.loser_id === opponent.id) {
+      return opponent.name;
+    }
+    
+    // If we can't determine from the current references, look in the players array
+    const loserFromPlayers = players.find(p => p.id === game.loser_id);
+    if (loserFromPlayers) {
+      return loserFromPlayers.name;
+    }
+    
+    return "Someone";
+  };
   
   const handlePlayAgain = () => {
     toast.success("Starting a new game!");
@@ -89,7 +107,7 @@ const Game = () => {
       {game_phase === 'selection' && (
         <TeamSelection 
           onSelect={selectAvatar}
-          selectedAvatar={currentPlayer.character_type}
+          selectedAvatar={currentPlayer?.character_type}
           opponentAvatar={opponent?.character_type}
           onStartCountdown={startCountdown}
           isHost={isHost}
@@ -113,7 +131,7 @@ const Game = () => {
       
       {game_phase === 'over' && (
         <GameOver 
-          loserName={loserName}
+          loserName={getLoserName()}
           onPlayAgain={handlePlayAgain}
         />
       )}

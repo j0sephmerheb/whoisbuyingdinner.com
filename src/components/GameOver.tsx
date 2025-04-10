@@ -22,7 +22,7 @@ const GameOver: React.FC<GameOverProps> = ({ loserName, onPlayAgain }) => {
         <h2 className="text-3xl font-bold mb-6">Game Over!</h2>
         
         <p className="text-2xl mb-8 text-gameAccent">
-          <span className="font-bold">{loserName}</span> is buying dinner!
+          <span className="font-bold">{loserName || 'Someone'}</span> is buying dinner!
         </p>
         
         <Button 
