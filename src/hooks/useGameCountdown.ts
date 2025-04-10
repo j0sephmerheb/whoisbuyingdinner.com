@@ -1,11 +1,13 @@
+
 import { useState } from 'react';
 import * as gameService from '@/services/game';
 import { GameData } from '@/services/game';
 
 /**
- * Hook for managing game countdown functionality
+ * Hook for managing game start functionality
+ * The countdown has been removed as requested
  * @param game - The current game data
- * @returns Functions and state for managing game countdown
+ * @returns Functions and state for managing game start
  */
 export const useGameCountdown = (game: GameData | null) => {
   // We're keeping these states for compatibility, but we won't use the countdown
