@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { PlayerData } from '@/services/game';
+import { PlayerData, CharacterType } from '@/services/game';
 
 interface GameBoardProps {
   currentPlayer: PlayerData;
@@ -9,11 +9,15 @@ interface GameBoardProps {
 
 const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
   // Get the emoji based on character type
-  const emojiMap: Record<string, string> = {
+  const emojiMap: Record<CharacterType, string> = {
     cowboy: '🤠',
     ninja: '🥷',
     fireman: '👨‍🚒',
-    santa: '🎅'
+    santa: '🎅',
+    princess: '👸',
+    fairy: '🧚‍♀️',
+    mermaid: '🧜‍♀️',
+    witch: '🧙‍♀️'
   };
   
   const userEmoji = emojiMap[currentPlayer.character_type] || '🤠';
@@ -26,6 +30,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
       case 'ninja': return 'bg-purple-100';
       case 'fireman': return 'bg-red-100';
       case 'santa': return 'bg-green-100';
+      case 'princess': return 'bg-pink-100';
+      case 'fairy': return 'bg-yellow-100';
+      case 'mermaid': return 'bg-cyan-100';
+      case 'witch': return 'bg-violet-100';
       default: return 'bg-gray-100';
     }
   };
