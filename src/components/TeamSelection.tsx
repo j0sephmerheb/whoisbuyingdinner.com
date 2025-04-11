@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CharacterType } from '@/services/game';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
 
 interface AvatarSelectionProps {
@@ -24,42 +23,49 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
   bothPlayersJoined,
   bothPlayersSelectedAvatar
 }) => {
-  const avatarOptions: CharacterType[] = ['cowboy', 'ninja', 'fireman', 'santa'];
+  const avatarOptions: CharacterType[] = [
+    'cowboy', 'ninja', 'fireman', 'santa',
+    'princess', 'fairy', 'mermaid', 'witch'
+  ];
   
   const avatarEmoji: Record<CharacterType, string> = {
     cowboy: '🤠',
     ninja: '🥷',
     fireman: '👨‍🚒',
-    santa: '🎅'
+    santa: '🎅',
+    princess: '👸',
+    fairy: '🧚‍♀️',
+    mermaid: '🧜‍♀️',
+    witch: '🧙‍♀️'
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 p-8">
-      <h1 className="text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
+    <div className="flex flex-col items-center gap-4 sm:gap-8 p-4 sm:p-8">
+      <h1 className="text-2xl sm:text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
       
-      <div className="grid grid-cols-4 md:grid-cols-4 gap-6 w-full max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
         {avatarOptions.map(avatar => (
           <Card
             key={avatar}
-            className={`p-4 cursor-pointer transition-all ${
+            className={`p-2 sm:p-4 cursor-pointer transition-all ${
               selectedAvatar === avatar 
                 ? 'bg-gameAccent/30 border-2 border-gameAccent' 
                 : 'hover:bg-gray-100 border border-gray-200'
             }`}
             onClick={() => onSelect(avatar)}
           >
-            <div className="flex flex-col items-center gap-4">
-              <div className="h-24 w-24 flex items-center justify-center bg-white rounded-full text-4xl">
-                <span className="text-5xl">{avatarEmoji[avatar]}</span>
+            <div className="flex flex-col items-center gap-2 sm:gap-4">
+              <div className="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center bg-white rounded-full text-4xl">
+                <span className="text-3xl sm:text-5xl">{avatarEmoji[avatar]}</span>
               </div>
             </div>
           </Card>
         ))}
       </div>
       
-      <div className="mt-8 w-full max-w-2xl">
+      <div className="mt-4 sm:mt-8 w-full max-w-2xl">
         <div className="flex justify-between items-center p-4 bg-white/80 rounded-lg shadow mb-4">
-          <h3 className="text-xl font-semibold">Game Status:</h3>
+          <h3 className="text-lg sm:text-xl font-semibold">Game Status:</h3>
           <div>
             {bothPlayersJoined ? (
               <span className="text-green-600 font-medium">Both players joined ✓</span>
@@ -69,12 +75,12 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
           </div>
         </div>
         
-        <div className="flex flex-col md:flex-row justify-between gap-4">
+        <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="flex-1 p-4 bg-white/80 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Your Selection:</h3>
+            <h3 className="text-md sm:text-lg font-semibold mb-2">Your Selection:</h3>
             {selectedAvatar ? (
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{avatarEmoji[selectedAvatar]}</span>
+                <span className="text-2xl sm:text-3xl">{avatarEmoji[selectedAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
@@ -82,10 +88,10 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
           </div>
           
           <div className="flex-1 p-4 bg-white/80 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2">Opponent's Selection:</h3>
+            <h3 className="text-md sm:text-lg font-semibold mb-2">Opponent's Selection:</h3>
             {opponentAvatar ? (
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{avatarEmoji[opponentAvatar]}</span>
+                <span className="text-2xl sm:text-3xl">{avatarEmoji[opponentAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Waiting for opponent...</span>
@@ -97,20 +103,20 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
       {isHost && bothPlayersJoined && bothPlayersSelectedAvatar && (
         <Button 
           onClick={onStartCountdown}
-          className="mt-6 bg-gameAccent hover:bg-gameAccent/80 text-white font-bold py-2 px-8 text-lg"
+          className="mt-4 sm:mt-6 bg-gameAccent hover:bg-gameAccent/80 text-white font-bold py-2 px-6 sm:px-8 text-md sm:text-lg"
         >
           Start Game
         </Button>
       )}
       
       {!isHost && bothPlayersSelectedAvatar && (
-        <div className="mt-6 p-4 bg-white/80 rounded-lg shadow text-center">
+        <div className="mt-4 sm:mt-6 p-4 bg-white/80 rounded-lg shadow text-center">
           <p className="text-gray-600">Waiting for host to start the game...</p>
         </div>
       )}
       
       <div className="mt-4 p-4 bg-white/80 rounded-lg shadow">
-        <h3 className="text-xl font-semibold mb-2">Game Rules</h3>
+        <h3 className="text-lg sm:text-xl font-semibold mb-2">Game Rules</h3>
         <ul className="list-disc pl-6 space-y-1">
           <li>You'll have 5 characters on your team</li>
           <li>Each round, roll your dice against your opponent</li>

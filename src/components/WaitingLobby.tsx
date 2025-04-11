@@ -63,15 +63,15 @@ const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPla
   };
   
   return (
-    <div className="flex flex-col items-center gap-6 p-8 text-center">
-      <h2 className="text-3xl font-bold text-gameAccent">Waiting for Your Opponent</h2>
+    <div className="flex flex-col items-center gap-4 sm:gap-6 p-4 sm:p-8 text-center">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gameAccent">Waiting for Your Opponent</h2>
       
       <Card className="w-full max-w-md bg-white/90">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <p className="mb-4">Share this link with your friend:</p>
-          <div className="bg-gray-100 p-3 rounded-md font-mono text-center break-all relative">
+          <div className="bg-gray-100 p-2 sm:p-3 rounded-md font-mono text-center break-all relative">
             <div className="flex items-center justify-between">
-              <span className="mr-2 text-sm overflow-hidden overflow-ellipsis">{fullUrl}</span>
+              <span className="text-xs sm:text-sm overflow-hidden overflow-ellipsis">{fullUrl}</span>
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -140,11 +140,11 @@ const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPla
             </div>
           )}
           
-          <div className="mt-6">
+          <div className="mt-4 sm:mt-6">
             <h3 className="font-semibold mb-2">Players in lobby ({players.length}/2):</h3>
             <ul className="space-y-2">
               {players.map(player => (
-                <li key={player.id} className="px-4 py-2 bg-gray-50 rounded-md flex items-center gap-2">
+                <li key={player.id} className="px-3 sm:px-4 py-2 bg-gray-50 rounded-md flex items-center gap-2">
                   {player.is_host && <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Host</span>}
                   <span>{player.name}</span>
                   {player.id === currentPlayer.id && <span className="text-xs text-gray-500">(You)</span>}
@@ -153,7 +153,7 @@ const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPla
             </ul>
           </div>
           
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+          <div className="mt-4 sm:mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
             {players.length < 2 ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
