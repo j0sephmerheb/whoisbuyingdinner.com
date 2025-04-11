@@ -39,12 +39,17 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     witch: '🧙‍♀️'
   };
 
+  const handleSelectAvatar = (avatar: CharacterType) => {
+    console.log('Selecting avatar:', avatar);
+    onSelect(avatar);
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 sm:gap-8 p-4 sm:p-8">
       <h1 className="text-2xl sm:text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
       
-      {/* Updated grid to display in 4 columns on larger screens, 2 on mobile */}
-      <div className="grid grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
+      {/* Use grid-cols-2 for mobile and grid-cols-4 for larger screens */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
         {avatarOptions.map(avatar => (
           <Card
             key={avatar}
@@ -53,7 +58,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
                 ? 'bg-gameAccent/30 border-2 border-gameAccent' 
                 : 'hover:bg-gray-100 border border-gray-200'
             }`}
-            onClick={() => onSelect(avatar)}
+            onClick={() => handleSelectAvatar(avatar)}
           >
             <div className="flex flex-col items-center gap-2 sm:gap-4">
               <div className="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center bg-white rounded-full text-4xl">
@@ -82,6 +87,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {selectedAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">{avatarEmoji[selectedAvatar]}</span>
+                <span className="text-gray-800">{selectedAvatar}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
@@ -93,6 +99,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {opponentAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">{avatarEmoji[opponentAvatar]}</span>
+                <span className="text-gray-800">{opponentAvatar}</span>
               </div>
             ) : (
               <span className="text-gray-500">Waiting for opponent...</span>

@@ -21,6 +21,8 @@ export const useAvatarSelection = (currentPlayer: PlayerData | null) => {
     if (!currentPlayer) return false;
     
     setIsSelecting(true);
+    console.log(`Selecting avatar ${avatarType} for player ${currentPlayer.id}`);
+    
     try {
       const result = await gameService.selectAvatar(currentPlayer.id, avatarType);
       if (!result) {
