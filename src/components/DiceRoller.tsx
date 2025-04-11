@@ -67,7 +67,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Your Roll</span>
           <div 
-            className={`w-40 h-40 flex items-center justify-center text-5xl font-bold bg-white border-4 
+            className={`w-40 h-40 flex items-center justify-center text-5xl select-none font-bold bg-white border-4 
               ${userDiceValue && opponentDiceValue && userDiceValue > opponentDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && userDiceValue < opponentDiceValue 
@@ -98,7 +98,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
         <div className="flex flex-col items-center gap-2">
           <span className="text-lg font-semibold">Opponent Roll</span>
           <div 
-            className={`w-40 h-40 flex items-center justify-center text-5xl font-bold bg-white border-4
+            className={`w-40 h-40 flex items-center justify-center text-5xl select-none font-bold bg-white border-4
               ${userDiceValue && opponentDiceValue && opponentDiceValue > userDiceValue 
                 ? 'border-green-500' 
                 : userDiceValue && opponentDiceValue && opponentDiceValue < userDiceValue 

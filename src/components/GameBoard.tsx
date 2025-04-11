@@ -45,21 +45,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
     <div className="w-full py-2">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className={`p-4 ${userTeamColor} shadow-lg border-none`}>
-          <h3 className="text-xl font-bold mb-3">
+          <h3 className="text-xl font-bold mb-3 text-center">
             {currentPlayer.name}
           </h3>
           <div className="flex justify-center gap-2">
             {currentPlayer.character_data.map((character, index) => (
               <div 
                 key={`user-${index}`} 
-                className={`w-16 h-16 flex items-center justify-center text-3xl rounded-full ${
+                className={`w-16 h-16 flex items-center justify-center rounded-full select-none ${
                   character.alive 
-                    ? 'bg-white shadow-md' 
-                    : 'bg-gray-300 opacity-50'
+                    ? 'bg-transparent sm:bg-white shadow-none sm:shadow-md text-2xl sm:text-3xl' 
+                    : 'bg-transparent sm:bg-gray-300 opacity-50 text-2xl sm:text-3xl'
                 }`}
               >
                 {character.alive ? (
-                  <span className="animate-float">{userEmoji}</span>
+                  <span>{userEmoji}</span>
                 ) : (
                   <span className="text-red-500">💀</span>
                 )}
@@ -69,21 +69,21 @@ const GameBoard: React.FC<GameBoardProps> = ({ currentPlayer, opponent }) => {
         </Card>
         
         <Card className={`p-4 ${opponentTeamColor} shadow-lg border-none`}>
-          <h3 className="text-xl font-bold mb-3">
+          <h3 className="text-xl font-bold mb-3 text-center">
             {opponent?.name || 'Opponent'}
           </h3>
           <div className="flex justify-center gap-2">
             {opponent?.character_data.map((character, index) => (
               <div 
                 key={`system-${index}`} 
-                className={`w-16 h-16 flex items-center justify-center text-3xl rounded-full ${
+                className={`w-16 h-16 flex items-center justify-center rounded-full select-none ${
                   character.alive 
-                    ? 'bg-white shadow-md' 
-                    : 'bg-gray-300 opacity-50'
+                    ? 'bg-transparent sm:bg-white shadow-none sm:shadow-md text-2xl sm:text-3xl' 
+                    : 'bg-transparent sm:bg-gray-300 opacity-50 text-2xl sm:text-3xl'
                 }`}
               >
                 {character.alive ? (
-                  <span className="animate-float">{opponentEmoji}</span>
+                  <span>{opponentEmoji}</span>
                 ) : (
                   <span className="text-red-500">💀</span>
                 )}

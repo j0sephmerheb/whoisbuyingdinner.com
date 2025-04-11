@@ -1,7 +1,6 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CharacterType, DBCharacterType } from '@/services/game';
+import { CharacterType } from '@/services/game';
 import { Card } from '@/components/ui/card';
 
 interface AvatarSelectionProps {
@@ -39,49 +38,10 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     witch: '🧙‍♀️'
   };
 
-  // This mapping helps us identify which DB avatar type corresponds to the UI avatar
-  const dbToUiAvatarMapping: Record<DBCharacterType, CharacterType[]> = {
-    'cowboy': ['cowboy', 'witch'],
-    'ninja': ['ninja', 'fairy'],
-    'fireman': ['fireman', 'mermaid'],
-    'santa': ['santa', 'princess']
-  };
-
   // Helper function to check if an avatar is selected
   const isAvatarSelected = (avatar: CharacterType): boolean => {
     if (!selectedAvatar) return false;
-    
-    // Direct match
-    if (selectedAvatar === avatar) return true;
-    
-    // Check if the DB representation of the current avatar matches the selected avatar's DB representation
-    const dbMapping = {
-      'princess': 'santa',
-      'fairy': 'ninja',
-      'mermaid': 'fireman',
-      'witch': 'cowboy'
-    } as Record<string, DBCharacterType>;
-    
-    // For female avatars, check if their DB equivalent is the selected avatar's DB equivalent
-    if (['princess', 'fairy', 'mermaid', 'witch'].includes(avatar)) {
-      const avatarDbType = dbMapping[avatar];
-      const selectedAvatarDbType = ['cowboy', 'ninja', 'fireman', 'santa'].includes(selectedAvatar) 
-        ? selectedAvatar as DBCharacterType
-        : dbMapping[selectedAvatar];
-        
-      return avatarDbType === selectedAvatarDbType;
-    }
-    
-    // For male avatars, also check if the selected avatar maps to this DB type
-    if (['cowboy', 'ninja', 'fireman', 'santa'].includes(avatar)) {
-      const selectedAvatarDbType = ['cowboy', 'ninja', 'fireman', 'santa'].includes(selectedAvatar)
-        ? selectedAvatar as DBCharacterType
-        : dbMapping[selectedAvatar];
-        
-      return avatar === selectedAvatarDbType;
-    }
-    
-    return false;
+    return selectedAvatar === avatar;
   };
 
   const handleSelectAvatar = (avatar: CharacterType) => {
@@ -94,7 +54,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
       <h1 className="text-2xl sm:text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
       
       {/* Use grid-cols-2 for mobile and grid-cols-4 for larger screens */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
+      <div className="grid grid-cols-4 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
         {avatarOptions.map(avatar => (
           <Card
             key={avatar}
@@ -109,7 +69,6 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
               <div className="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center bg-white rounded-full text-4xl">
                 <span className="text-3xl sm:text-5xl">{avatarEmoji[avatar]}</span>
               </div>
-              <span className="text-sm sm:text-base capitalize">{avatar}</span>
             </div>
           </Card>
         ))}
@@ -127,13 +86,12 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
           </div>
         </div>
         
-        <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <div className="flex flex-row sm:flex-row justify-between gap-4 text-center">
           <div className="flex-1 p-4 bg-white/80 rounded-lg shadow">
             <h3 className="text-md sm:text-lg font-semibold mb-2">Your Selection:</h3>
             {selectedAvatar ? (
-              <div className="flex items-center gap-3">
+              <div className="d-block ma-auto">
                 <span className="text-2xl sm:text-3xl">{avatarEmoji[selectedAvatar]}</span>
-                <span className="text-gray-800 capitalize">{selectedAvatar}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
@@ -143,9 +101,8 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
           <div className="flex-1 p-4 bg-white/80 rounded-lg shadow">
             <h3 className="text-md sm:text-lg font-semibold mb-2">Opponent's Selection:</h3>
             {opponentAvatar ? (
-              <div className="flex items-center gap-3">
-                <span className="text-2xl sm:text-3xl">{avatarEmoji[opponentAvatar]}</span>
-                <span className="text-gray-800 capitalize">{opponentAvatar}</span>
+              <div className="d-block ma-auto">
+                <span className="text-2xl sm:text-3xl select-none">{avatarEmoji[opponentAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Waiting for opponent...</span>
@@ -169,7 +126,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
         </div>
       )}
       
-      <div className="mt-4 p-4 bg-white/80 rounded-lg shadow">
+      <div className="mt-4 p-4 bg-white/80 rounded-lg shadow w-full max-w-2xl">
         <h3 className="text-lg sm:text-xl font-semibold mb-2">Game Rules</h3>
         <ul className="list-disc pl-6 space-y-1">
           <li>You'll have 5 characters on your team</li>

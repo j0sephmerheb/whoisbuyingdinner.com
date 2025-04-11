@@ -1,43 +1,20 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { CharacterType, DBCharacterType } from './types';
-
-// Convert UI character type to database-compatible type
-const convertToDBCharacterType = (avatarType: CharacterType): DBCharacterType => {
-  // If the type is already a valid DB type, return it
-  if (['cowboy', 'ninja', 'fireman', 'santa'].includes(avatarType as string)) {
-    return avatarType as DBCharacterType;
-  }
-  
-  // Map female character types to compatible DB types
-  // This is a temporary solution until the database schema is updated
-  const mapping: Record<string, DBCharacterType> = {
-    'princess': 'santa',
-    'fairy': 'ninja',
-    'mermaid': 'fireman',
-    'witch': 'cowboy'
-  };
-  
-  return mapping[avatarType as string] || 'cowboy';
-};
+import { CharacterType } from './types';
 
 // Select avatar
 export const selectAvatar = async (playerId: string, avatarType: CharacterType): Promise<boolean> => {
   console.log(`[API] Selecting avatar ${avatarType} for player ${playerId}`);
   
-  // Convert to DB-compatible type before saving
-  const dbCharacterType = convertToDBCharacterType(avatarType);
-  
   const { error } = await supabase
     .from('players')
-    .update({ character_type: dbCharacterType })
+    .update({ character_type: avatarType })
     .eq('id', playerId);
 
   if (error) {
     console.error("Error selecting avatar:", error);
     return false;
   }
-  console.log(`[API] Avatar ${dbCharacterType} successfully selected for player ${playerId}`);
+  console.log(`[API] Avatar ${avatarType} successfully selected for player ${playerId}`);
   return true;
 };
 
