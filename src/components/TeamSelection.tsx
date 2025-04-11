@@ -43,7 +43,8 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     <div className="flex flex-col items-center gap-4 sm:gap-8 p-4 sm:p-8">
       <h1 className="text-2xl sm:text-4xl font-bold text-gameAccent mb-2">Choose Your Avatar</h1>
       
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
+      {/* Updated grid to display in 4 columns on larger screens, 2 on mobile */}
+      <div className="grid grid-cols-4 gap-3 sm:gap-6 w-full max-w-2xl">
         {avatarOptions.map(avatar => (
           <Card
             key={avatar}
@@ -64,9 +65,9 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
       </div>
       
       <div className="mt-4 sm:mt-8 w-full max-w-2xl">
-        <div className="flex justify-between items-center p-4 bg-white/80 rounded-lg shadow mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center p-4 bg-white/80 rounded-lg shadow mb-4">
           <h3 className="text-lg sm:text-xl font-semibold">Game Status:</h3>
-          <div>
+          <div className="mt-2 sm:mt-0">
             {bothPlayersJoined ? (
               <span className="text-green-600 font-medium">Both players joined ✓</span>
             ) : (
