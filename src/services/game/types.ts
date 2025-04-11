@@ -4,8 +4,8 @@ export type GamePhase = 'waiting' | 'selection' | 'playing' | 'rolling' | 'resul
 
 // Extended character types for both UI and DB
 export type CharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa' | 'princess' | 'fairy' | 'mermaid' | 'witch';
-// For backward compatibility
-export type DBCharacterType = CharacterType;
+// For database compatibility, we need to restrict to types allowed in the Supabase enum
+export type DBCharacterType = 'cowboy' | 'ninja' | 'fireman' | 'santa';
 
 export interface GameData {
   id: string;
