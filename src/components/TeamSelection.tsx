@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { CharacterType } from '@/services/game';
+import { CharacterType, DBCharacterType } from '@/services/game';
 import { Card } from '@/components/ui/card';
 
 interface AvatarSelectionProps {
@@ -39,6 +39,51 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
     witch: '🧙‍♀️'
   };
 
+  // This mapping helps us identify which DB avatar type corresponds to the UI avatar
+  const dbToUiAvatarMapping: Record<DBCharacterType, CharacterType[]> = {
+    'cowboy': ['cowboy', 'witch'],
+    'ninja': ['ninja', 'fairy'],
+    'fireman': ['fireman', 'mermaid'],
+    'santa': ['santa', 'princess']
+  };
+
+  // Helper function to check if an avatar is selected
+  const isAvatarSelected = (avatar: CharacterType): boolean => {
+    if (!selectedAvatar) return false;
+    
+    // Direct match
+    if (selectedAvatar === avatar) return true;
+    
+    // Check if the DB representation of the current avatar matches the selected avatar's DB representation
+    const dbMapping = {
+      'princess': 'santa',
+      'fairy': 'ninja',
+      'mermaid': 'fireman',
+      'witch': 'cowboy'
+    } as Record<string, DBCharacterType>;
+    
+    // For female avatars, check if their DB equivalent is the selected avatar's DB equivalent
+    if (['princess', 'fairy', 'mermaid', 'witch'].includes(avatar)) {
+      const avatarDbType = dbMapping[avatar];
+      const selectedAvatarDbType = ['cowboy', 'ninja', 'fireman', 'santa'].includes(selectedAvatar) 
+        ? selectedAvatar as DBCharacterType
+        : dbMapping[selectedAvatar];
+        
+      return avatarDbType === selectedAvatarDbType;
+    }
+    
+    // For male avatars, also check if the selected avatar maps to this DB type
+    if (['cowboy', 'ninja', 'fireman', 'santa'].includes(avatar)) {
+      const selectedAvatarDbType = ['cowboy', 'ninja', 'fireman', 'santa'].includes(selectedAvatar)
+        ? selectedAvatar as DBCharacterType
+        : dbMapping[selectedAvatar];
+        
+      return avatar === selectedAvatarDbType;
+    }
+    
+    return false;
+  };
+
   const handleSelectAvatar = (avatar: CharacterType) => {
     console.log('Selecting avatar:', avatar);
     onSelect(avatar);
@@ -54,7 +99,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
           <Card
             key={avatar}
             className={`p-2 sm:p-4 cursor-pointer transition-all ${
-              selectedAvatar === avatar 
+              isAvatarSelected(avatar) 
                 ? 'bg-gameAccent/30 border-2 border-gameAccent' 
                 : 'hover:bg-gray-100 border border-gray-200'
             }`}
@@ -64,6 +109,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
               <div className="h-16 w-16 sm:h-24 sm:w-24 flex items-center justify-center bg-white rounded-full text-4xl">
                 <span className="text-3xl sm:text-5xl">{avatarEmoji[avatar]}</span>
               </div>
+              <span className="text-sm sm:text-base capitalize">{avatar}</span>
             </div>
           </Card>
         ))}
@@ -87,7 +133,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {selectedAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">{avatarEmoji[selectedAvatar]}</span>
-                <span className="text-gray-800">{selectedAvatar}</span>
+                <span className="text-gray-800 capitalize">{selectedAvatar}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
@@ -99,7 +145,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             {opponentAvatar ? (
               <div className="flex items-center gap-3">
                 <span className="text-2xl sm:text-3xl">{avatarEmoji[opponentAvatar]}</span>
-                <span className="text-gray-800">{opponentAvatar}</span>
+                <span className="text-gray-800 capitalize">{opponentAvatar}</span>
               </div>
             ) : (
               <span className="text-gray-500">Waiting for opponent...</span>

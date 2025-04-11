@@ -28,6 +28,7 @@ export const useAvatarSelection = (currentPlayer: PlayerData | null) => {
       if (!result) {
         toast.error('Failed to select avatar');
       } else {
+        // Show the actually selected avatar in the toast
         toast.success(`You selected ${avatarType}!`);
       }
       return result;
