@@ -2,8 +2,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Copy, Check } from 'lucide-react';
+import { Loader2, Copy, Check, Facebook, Twitter, Linkedin, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface WaitingLobbyProps {
   gameId: string;
@@ -13,6 +16,7 @@ interface WaitingLobbyProps {
 
 const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPlayer }) => {
   const [copied, setCopied] = useState(false);
+  const isMobile = useIsMobile();
   const fullUrl = window.location.origin + '/join/' + gameId;
   
   const copyToClipboard = () => {
@@ -21,6 +25,41 @@ const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPla
       toast.success('Game link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+  
+  const shareOnSocialMedia = (platform: string) => {
+    let shareUrl = '';
+    const encodedUrl = encodeURIComponent(fullUrl);
+    const message = encodeURIComponent('Join my dinner game! Who will be paying tonight?');
+    
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${message}&url=${encodedUrl}`;
+        break;
+      case 'linkedin':
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+      default:
+        // Use Web Share API as fallback if available
+        if (navigator.share) {
+          navigator.share({
+            title: 'Join my dinner game!',
+            text: 'Who will be paying tonight?',
+            url: fullUrl
+          }).catch(err => {
+            console.error('Error sharing:', err);
+          });
+          return;
+        }
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400');
+      toast.success(`Sharing on ${platform}!`);
+    }
   };
   
   return (
@@ -43,6 +82,63 @@ const WaitingLobby: React.FC<WaitingLobbyProps> = ({ gameId, players, currentPla
               </Button>
             </div>
           </div>
+          
+          {isMobile && (
+            <div className="mt-4">
+              <p className="text-sm mb-2">Share on social media:</p>
+              <div className="flex justify-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="bg-[#1877F2] text-white hover:bg-[#1877F2]/90"
+                  onClick={() => shareOnSocialMedia('facebook')}
+                >
+                  <Facebook size={18} />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="bg-[#1DA1F2] text-white hover:bg-[#1DA1F2]/90"
+                  onClick={() => shareOnSocialMedia('twitter')}
+                >
+                  <Twitter size={18} />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90"
+                  onClick={() => shareOnSocialMedia('linkedin')}
+                >
+                  <Linkedin size={18} />
+                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="bg-gray-700 text-white hover:bg-gray-700/90"
+                    >
+                      <Share2 size={18} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="center">
+                    <div className="grid gap-4 p-4">
+                      <div className="text-sm">
+                        Use your device's share feature
+                      </div>
+                      <Button
+                        className={cn("w-full", navigator.share ? "" : "opacity-50 cursor-not-allowed")}
+                        disabled={!navigator.share}
+                        onClick={() => shareOnSocialMedia('native')}
+                      >
+                        Share
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          )}
           
           <div className="mt-6">
             <h3 className="font-semibold mb-2">Players in lobby ({players.length}/2):</h3>
