@@ -91,7 +91,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      character_type: "cowboy" | "ninja" | "fireman" | "santa" | "princess" | "fairy" | "mermaid" | "witch"
+      character_type:
+        | "cowboy"
+        | "ninja"
+        | "fireman"
+        | "santa"
+        | "princess"
+        | "fairy"
+        | "mermaid"
+        | "witch"
       game_phase:
         | "waiting"
         | "selection"
@@ -214,7 +222,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      character_type: ["cowboy", "ninja", "fireman", "santa", "princess", "fairy", "mermaid", "witch"],
+      character_type: [
+        "cowboy",
+        "ninja",
+        "fireman",
+        "santa",
+        "princess",
+        "fairy",
+        "mermaid",
+        "witch",
+      ],
       game_phase: [
         "waiting",
         "selection",
