@@ -84,7 +84,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
             gamePhase: roundOutcome.gamePhase || 'playing',
           };
         });
-      }, 2000);
+      }, 3000);
     }, 1500);
   };
   

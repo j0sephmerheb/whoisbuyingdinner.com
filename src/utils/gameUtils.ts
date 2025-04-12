@@ -78,19 +78,10 @@ export const resolveRoundOutcome = (
     
     if (userAliveCount > systemAliveCount) {
       winner = gameState.userTeam!;
-      toast(`${gameState.userTeam} wins! You are victorious!`, {
-        duration: 5000,
-      });
     } else if (systemAliveCount > userAliveCount) {
       winner = null; // We don't know the opponent's team here, so just set null
-      toast(`You lost! Better luck next time!`, {
-        duration: 5000,
-      });
     } else {
       winner = 'tie';
-      toast("It's a tie! Both teams fought valiantly!", {
-        duration: 5000,
-      });
     }
   }
   

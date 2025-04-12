@@ -54,7 +54,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
             {userDiceValue === null && opponentDiceValue === null ? 'Time to roll!' : 
               userDiceValue !== null && opponentDiceValue === null ? 'Waiting for opponent...' :
               userDiceValue === null && opponentDiceValue !== null ? 'Your turn to roll!' : 
-              'Both players rolled!'}
+              ''}
           </span>
         ) : canRoll ? (
           <span className="font-medium">Time to roll!</span>

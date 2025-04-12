@@ -27,8 +27,6 @@ const GameOver: React.FC<GameOverProps> = ({ loserName }) => {
     // Clear any stored state
     sessionStorage.clear();
     localStorage.clear();
-    // Show success message
-    toast.success("Starting fresh!");
     // Navigate to home
     navigate('/', { replace: true });
   };

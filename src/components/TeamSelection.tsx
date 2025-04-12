@@ -91,7 +91,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
             <h3 className="text-md sm:text-lg font-semibold mb-2">Your Selection:</h3>
             {selectedAvatar ? (
               <div className="d-block ma-auto">
-                <span className="text-2xl sm:text-3xl">{avatarEmoji[selectedAvatar]}</span>
+                <span className="text-2xl sm:text-3xl select-none">{avatarEmoji[selectedAvatar]}</span>
               </div>
             ) : (
               <span className="text-gray-500">Please select an avatar</span>
