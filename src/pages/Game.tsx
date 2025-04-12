@@ -123,6 +123,7 @@ const Game = () => {
           isHost={isHost}
           bothPlayersJoined={bothPlayersJoined}
           bothPlayersSelectedAvatar={bothPlayersSelectedAvatar}
+          players={players}
         />
       )}
       

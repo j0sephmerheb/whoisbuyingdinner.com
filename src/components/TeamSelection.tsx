@@ -11,6 +11,7 @@ interface AvatarSelectionProps {
   isHost: boolean;
   bothPlayersJoined: boolean;
   bothPlayersSelectedAvatar: boolean;
+  players: { is_host: boolean; name: string }[];
 }
 
 const AvatarSelection: React.FC<AvatarSelectionProps> = ({ 
@@ -20,7 +21,8 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
   onStartCountdown,
   isHost,
   bothPlayersJoined,
-  bothPlayersSelectedAvatar
+  bothPlayersSelectedAvatar,
+  players
 }) => {
   const avatarOptions: CharacterType[] = [
     'cowboy', 'ninja', 'fireman', 'santa',
@@ -122,7 +124,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({
       
       {!isHost && bothPlayersSelectedAvatar && (
         <div className="mt-4 sm:mt-6 p-4 bg-white/80 rounded-lg shadow text-center">
-          <p className="text-gray-600">Waiting for host to start the game...</p>
+          <p className="text-gray-600">Waiting for {players.find(p => p.is_host)?.name || 'host'} to start the game...</p>
         </div>
       )}
       
