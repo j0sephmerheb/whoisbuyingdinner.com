@@ -1,5 +1,6 @@
 
 # Who is buying dinner?
+- https://dices.whoisbuyingdinner.com/
 
 ## Branch Structure
 - `main`: Development branch - all new features and changes should be made here
